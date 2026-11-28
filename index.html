@@ -757,7 +757,6 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Upload 1: Caldas 2026.xlsx -->
             <label id="caldas2026Dropzone" class="dropzone-amber rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer gap-1.5">
               <div class="text-2xl">🏢</div>
               <div class="text-xs sm:text-sm font-bold text-amber-200">1. Planilha Mensal de Apartamentos (Caldas 2026.xlsx)</div>
@@ -765,7 +764,6 @@
               <input type="file" id="caldas2026FileInput" accept=".xlsx,.xls" class="hidden" />
             </label>
 
-            <!-- Upload 2: Movimentação Lumine.xlsx -->
             <label id="movLumineDropzone" class="dropzone-glass rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer gap-1.5">
               <div class="text-2xl">📒</div>
               <div class="text-xs sm:text-sm font-bold text-cyan-200">2. Livro-Razão 4 Eixos (Movimentação Lumine.xlsx)</div>
@@ -799,23 +797,22 @@
               </div>
             </div>
 
-            <!-- Conferência Mês a Mês com Edição Fina de DAS/DARF e Ajuste Sócio -->
             <div id="syncMonthlyAuditWrap" class="hidden space-y-2">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span class="text-xs font-bold text-amber-200">Conferência Mês a Mês (Caldas 2026.xlsx) — Ajuste Impostos ou Sócio se necessário antes de gravar:</span>
+                <span class="text-xs font-bold text-amber-200">Conferência Mês a Mês (Caldas 2026.xlsx) — Arraste a tabela para o lado para conferir Impostos (DAS+DARF) e Ajuste Sócio:</span>
               </div>
               <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/70">
                 <table class="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr class="border-b border-white/10 bg-slate-900/90 text-[10px] uppercase text-slate-400">
-                      <th class="py-2 px-3">Mês</th>
-                      <th class="py-2 px-3 text-center">Unidades Lidas</th>
-                      <th class="py-2 px-3 text-right">Receita Bruta</th>
-                      <th class="py-2 px-3 text-right">Cond. + Energia</th>
-                      <th class="py-2 px-3 text-right">Comis./Desp./IPTU/Lav.</th>
-                      <th class="py-2 px-3 text-right">Financ. PF</th>
-                      <th class="py-2 px-3 text-right min-w-[130px]">Imposto DAS+DARF (R$)</th>
-                      <th class="py-2 px-3 text-right min-w-[130px]">Ajuste Sócio (R$)</th>
+                      <th class="py-2 px-2.5">Mês</th>
+                      <th class="py-2 px-2 text-center">Un.</th>
+                      <th class="py-2 px-2.5 text-right">Receita</th>
+                      <th class="py-2 px-2.5 text-right">Cond.+Ene.</th>
+                      <th class="py-2 px-2.5 text-right">Outros Op.</th>
+                      <th class="py-2 px-2.5 text-right">Financ. PF</th>
+                      <th class="py-2 px-2.5 text-right min-w-[115px]">DAS+DARF (R$)</th>
+                      <th class="py-2 px-2.5 text-right min-w-[115px]">Sócio (R$)</th>
                     </tr>
                   </thead>
                   <tbody id="syncMonthlyAuditBody" class="divide-y divide-white/5"></tbody>
@@ -1729,18 +1726,18 @@
 
       function monthNumberFromSheetName(sheetName) {
         const s = normalizeText(sheetName);
-        if (s.startsWith('jan')) return 1;
-        if (s.startsWith('fev')) return 2;
-        if (s.startsWith('mar')) return 3;
-        if (s.startsWith('abr')) return 4;
-        if (s.startsWith('mai')) return 5;
-        if (s.startsWith('jun')) return 6;
-        if (s.startsWith('jul')) return 7;
-        if (s.startsWith('ago')) return 8;
-        if (s.startsWith('set')) return 9;
-        if (s.startsWith('out')) return 10;
-        if (s.startsWith('nov')) return 11;
-        if (s.startsWith('dez')) return 12;
+        if (s.startsWith('jan') || s === '1' || s === '01') return 1;
+        if (s.startsWith('fev') || s === '2' || s === '02') return 2;
+        if (s.startsWith('mar') || s === '3' || s === '03') return 3;
+        if (s.startsWith('abr') || s === '4' || s === '04') return 4;
+        if (s.startsWith('mai') || s === '5' || s === '05') return 5;
+        if (s.startsWith('jun') || s === '6' || s === '06') return 6;
+        if (s.startsWith('jul') || s === '7' || s === '07') return 7;
+        if (s.startsWith('ago') || s === '8' || s === '08') return 8;
+        if (s.startsWith('set') || s === '9' || s === '09') return 9;
+        if (s.startsWith('out') || s === '10') return 10;
+        if (s.startsWith('nov') || s === '11') return 11;
+        if (s.startsWith('dez') || s === '12') return 12;
         return 0;
       }
 
@@ -1773,16 +1770,16 @@
             const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
             if (!rows || rows.length === 0) return;
 
-            let headerRowIdx = 0;
-            for (let i = 0; i < Math.min(8, rows.length); i++) {
+            let headerRowIdx = -1;
+            for (let i = 0; i < Math.min(20, rows.length); i++) {
               const rNorm = rows[i].map(c => normalizeText(c));
-              if (rNorm.some(c => c === 'apto' || c === 'apartamento' || c === 'receita')) {
+              if (rNorm.some(c => c.includes('apto') || c.includes('apartamento') || c.includes('receita') || c.includes('condom') || c.includes('energia'))) {
                 headerRowIdx = i;
                 break;
               }
             }
 
-            const headers = rows[headerRowIdx].map(c => normalizeText(c));
+            const headers = headerRowIdx >= 0 ? rows[headerRowIdx].map(c => normalizeText(c)) : [];
             const colApto = headers.findIndex(h => h.includes('apto') || h.includes('apartamento') || h.includes('unidade'));
             const idxApto = colApto >= 0 ? colApto : 0;
             const idxReceita = headers.findIndex(h => h.includes('receita') || h.includes('entrada') || h.includes('aluguel'));
@@ -1794,36 +1791,44 @@
             const idxIptu = headers.findIndex(h => h.includes('iptu'));
             const idxFinanc = headers.findIndex(h => h.includes('financ'));
 
-            for (let r = headerRowIdx + 1; r < rows.length; r++) {
+            const startRow = headerRowIdx >= 0 ? headerRowIdx + 1 : 0;
+            for (let r = startRow; r < rows.length; r++) {
               const row = rows[r];
               if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
 
-              const labelRaw = String(row[idxApto] ?? '').trim();
+              // Busca o rótulo na coluna principal ou em qualquer célula textual da linha
+              let labelRaw = String(row[idxApto] ?? '').trim();
+              if (!labelRaw) {
+                const firstTextCell = row.find(c => typeof c === 'string' && normalizeText(c).length > 0);
+                labelRaw = String(firstTextCell ?? '').trim();
+              }
               const labelNorm = normalizeText(labelRaw);
+              const fullRowText = row.map(c => typeof c === 'string' ? normalizeText(c) : '').join(' ');
 
-              if (!labelNorm) continue;
+              if (!labelNorm && !fullRowText.trim()) continue;
               if (labelNorm === 'total' || labelNorm.startsWith('total ') || labelNorm.startsWith('subtotal') || labelNorm.startsWith('ganho') || labelNorm.startsWith('lucro') || labelNorm.startsWith('saldo')) {
                 continue;
               }
 
-              // Verifica se a linha é um imposto (DAS / DARF) ou acerto com Vitor fora da tabela de aptos
-              if (labelNorm.includes('das') || labelNorm.includes('darf') || labelNorm.includes('imposto') || labelNorm.includes('simples')) {
-                const rowVals = row.slice(1).map(parseBrCurrency).filter(v => v !== 0);
+              // Captura Impostos (DAS / DARF / Simples) mesmo se escrito em colunas auxiliares
+              if (fullRowText.includes('das') || fullRowText.includes('darf') || fullRowText.includes('imposto') || fullRowText.includes('simples')) {
+                const rowVals = row.map(parseBrCurrency).filter(v => v !== 0);
                 if (rowVals.length > 0) {
                   monthlySummary[mNum].imposto = Number((monthlySummary[mNum].imposto + Math.abs(rowVals[0])).toFixed(2));
                 }
                 continue;
               }
 
-              if (labelNorm.includes('vitor') || labelNorm.includes('irmao') || labelNorm.includes('acerto') || labelNorm.includes('divisao') || labelNorm.includes('socio')) {
-                const rowVals = row.slice(1).map(parseBrCurrency).filter(v => v !== 0);
+              // Captura Ajuste Societário (Vitor / Irmão / Acerto) mesmo se escrito em colunas auxiliares
+              if (fullRowText.includes('vitor') || fullRowText.includes('irmao') || fullRowText.includes('acerto') || fullRowText.includes('divisao') || fullRowText.includes('socio')) {
+                const rowVals = row.map(parseBrCurrency).filter(v => v !== 0);
                 if (rowVals.length > 0) {
                   monthlySummary[mNum].ajuste = Number(rowVals[0].toFixed(2));
                 }
                 continue;
               }
 
-              const unitName = canonicalUnitName(labelRaw);
+              const unitName = canonicalUnitName(labelRaw) || canonicalUnitName(fullRowText);
               if (unitName && unitName !== 'TODAS') {
                 const key = `${mNum}::${unitName}`;
                 const existing = aptRecordsMap.get(key) || {
@@ -1849,9 +1854,8 @@
                 existing.financiamento = Number((existing.financiamento + (idxFinanc >= 0 ? parseBrCurrency(row[idxFinanc]) : 0)).toFixed(2));
 
                 aptRecordsMap.set(key, existing);
-              } else if (labelNorm.includes('lavand')) {
-                // Lavanderia compartilhada abaixo do Total -> rateia entre os 4 PJ principais
-                const rowVals = row.slice(1).map(parseBrCurrency).filter(v => v > 0);
+              } else if (fullRowText.includes('lavand')) {
+                const rowVals = row.map(parseBrCurrency).filter(v => v > 0);
                 const totalLav = rowVals.length > 0 ? rowVals[0] : 0;
                 if (totalLav > 0) {
                   const pjShareUnits = ['Lacqua V - 125', 'Lacqua V - 237', 'Lacqua V - 246', 'Piazza - 912'];
@@ -1867,7 +1871,6 @@
               }
             }
           } else {
-            // Aba auxiliar / resumo geral (caso exista com impostos ou ajuste do Vitor)
             const ws = workbook.Sheets[sheetName];
             const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
             rows.forEach(row => {
@@ -1875,7 +1878,6 @@
               const c0 = normalizeText(row[0]);
               const mFound = monthNumberFromSheetName(c0);
               if (mFound >= 1 && mFound <= 11) {
-                // Procura colunas se houver cabeçalho na aba resumo
                 const headerRow = rows.find(r => r.some(x => normalizeText(x).includes('imposto') || normalizeText(x).includes('das') || normalizeText(x).includes('vitor')));
                 if (headerRow) {
                   const hNorm = headerRow.map(x => normalizeText(x));
@@ -1947,6 +1949,7 @@
 
         const ledgerEntries = [];
         const vendorMemEntries = {};
+        const usedFitids = new Set();
 
         for (let r = headerIdx + 1; r < rows.length; r++) {
           const row = rows[r];
@@ -1964,7 +1967,17 @@
           const descBase = String(idxDesc >= 0 ? row[idxDesc] : '').trim();
           const msgExtra = String(idxMsg >= 0 ? row[idxMsg] : '').trim();
           const descricao = descBase || msgExtra || 'Movimentação Extrato';
+
+          // Garante FITID 100% único mesmo se a planilha repetir o Identificador em duas linhas
           const fitidRaw = String(idxId >= 0 ? row[idxId] : '').trim();
+          let uniqueFitid = (fitidRaw && fitidRaw !== '-' && fitidRaw !== '0')
+            ? fitidRaw
+            : `MOV2026-${String(r + 1).padStart(4, '0')}`;
+          if (usedFitids.has(uniqueFitid)) {
+            uniqueFitid = `${uniqueFitid}-L${r + 1}`;
+          }
+          usedFitids.add(uniqueFitid);
+
           const mes_num = parseCompetenciaMonth(idxComp >= 0 ? row[idxComp] : '', dataIso);
           const acrescimo = idxAcresc >= 0 ? parseBrCurrency(row[idxAcresc]) : 0;
 
@@ -1988,7 +2001,7 @@
           const contaBancaria = normalizeText(descricao).includes('cora') ? 'LUMINE PJ (CORA)' : 'LUMINE PJ (BTG)';
 
           ledgerEntries.push({
-            fitid: fitidRaw || `MOV2026-${String(r + 1).padStart(4, '0')}`,
+            fitid: uniqueFitid,
             data_movimento: dataIso,
             mes_num,
             conta: contaBancaria,
@@ -2053,17 +2066,17 @@
             const outrosOp = Number((s.comissao + s.despesas + s.iptu + s.lavanderia).toFixed(2));
             html += `
               <tr class="hover:bg-white/5">
-                <td class="py-2 px-3 font-bold text-white">${escapeHtml(MONTH_NAMES[m])}/2026</td>
-                <td class="py-2 px-3 text-center font-mono text-slate-300">${s.unitsCount}</td>
-                <td class="py-2 px-3 text-right money text-cyan-300 font-semibold">${formatBRL(s.receita)}</td>
-                <td class="py-2 px-3 text-right money text-slate-300">${formatBRL(condEne)}</td>
-                <td class="py-2 px-3 text-right money text-pink-300">${formatBRL(outrosOp)}</td>
-                <td class="py-2 px-3 text-right money text-sky-300">${formatBRL(s.financiamento)}</td>
-                <td class="py-2 px-3 text-right">
-                  <input type="number" step="0.01" data-sync-imp="${m}" value="${Number(s.imposto || 0).toFixed(2)}" class="glass-input money w-28 px-2 py-1 text-right text-xs text-amber-300" />
+                <td class="py-2 px-2.5 font-bold text-white whitespace-nowrap">${escapeHtml(MONTH_NAMES[m])}/2026</td>
+                <td class="py-2 px-2 text-center font-mono text-slate-300">${s.unitsCount}</td>
+                <td class="py-2 px-2.5 text-right money text-cyan-300 font-semibold whitespace-nowrap">${formatBRL(s.receita)}</td>
+                <td class="py-2 px-2.5 text-right money text-slate-300 whitespace-nowrap">${formatBRL(condEne)}</td>
+                <td class="py-2 px-2.5 text-right money text-pink-300 whitespace-nowrap">${formatBRL(outrosOp)}</td>
+                <td class="py-2 px-2.5 text-right money text-sky-300 whitespace-nowrap">${formatBRL(s.financiamento)}</td>
+                <td class="py-2 px-2.5 text-right">
+                  <input type="number" step="0.01" data-sync-imp="${m}" value="${Number(s.imposto || 0).toFixed(2)}" class="glass-input money w-24 px-2 py-1 text-right text-xs text-amber-300" />
                 </td>
-                <td class="py-2 px-3 text-right">
-                  <input type="number" step="0.01" data-sync-aju="${m}" value="${Number(s.ajuste || 0).toFixed(2)}" class="glass-input money w-28 px-2 py-1 text-right text-xs text-violet-300" />
+                <td class="py-2 px-2.5 text-right">
+                  <input type="number" step="0.01" data-sync-aju="${m}" value="${Number(s.ajuste || 0).toFixed(2)}" class="glass-input money w-24 px-2 py-1 text-right text-xs text-violet-300" />
                 </td>
               </tr>`;
           }
@@ -2111,11 +2124,9 @@
         btn.textContent = '⏳ Gravando no Supabase...';
 
         try {
-          // Garante que as 8 unidades canônicas existem no Supabase
           await supabaseClient.from('unidades').upsert(CANONICAL_UNITS_SEED, { onConflict: 'nome' });
 
           if (officialSyncDraft.caldasLoaded) {
-            // Limpa registros estimados de 2026 em registros_mensais_aptos e fechamentos_mensais
             const { error: delAptErr } = await supabaseClient.from('registros_mensais_aptos').delete().eq('ano', 2026);
             if (delAptErr) throw delAptErr;
 
@@ -2156,7 +2167,6 @@
           }
 
           if (officialSyncDraft.movLoaded) {
-            // Limpa lançamentos anteriores e insere em lotes de 100
             const { error: delLancErr } = await supabaseClient.from('lancamentos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             if (delLancErr) throw delLancErr;
 
