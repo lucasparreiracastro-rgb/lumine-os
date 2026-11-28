@@ -123,7 +123,7 @@
     }
 
     .glass-input {
-      background: rgba(8, 13, 27, 0.8);
+      background: rgba(8, 13, 27, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: #f8fafc;
       border-radius: 0.75rem;
@@ -191,6 +191,88 @@
       box-shadow: 0 0 28px -8px rgba(0, 245, 212, 0.45);
     }
 
+    /* ========================================================================
+       NEON COMBOBOX (BUSCA INTELIGENTE SUBSTRING + SEM ACENTO + TECLADO)
+       ======================================================================== */
+    .neon-cb-portal {
+      position: fixed;
+      z-index: 9999;
+      background: rgba(7, 12, 26, 0.98);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(0, 245, 212, 0.45);
+      box-shadow: 0 22px 50px -10px rgba(0, 0, 0, 0.9), 0 0 25px -8px rgba(0, 245, 212, 0.35);
+      border-radius: 0.85rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .neon-cb-list {
+      max-height: 270px;
+      overflow-y: auto;
+      padding: 0.35rem;
+    }
+
+    .neon-cb-group {
+      padding: 0.4rem 0.65rem 0.2rem;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #00f5d4;
+      user-select: none;
+    }
+
+    .neon-cb-group.fav-group {
+      color: #fbbf24;
+      border-bottom: 1px solid rgba(251, 191, 36, 0.16);
+      margin-bottom: 0.2rem;
+    }
+
+    .neon-cb-item {
+      padding: 0.48rem 0.65rem;
+      border-radius: 0.55rem;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #e2e8f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .neon-cb-item:hover,
+    .neon-cb-item.highlighted {
+      background: rgba(0, 245, 212, 0.16);
+      color: #ffffff;
+    }
+
+    .neon-cb-item.selected {
+      background: rgba(139, 92, 246, 0.22);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .neon-cb-mark {
+      background: rgba(0, 245, 212, 0.28);
+      color: #00f5d4;
+      font-weight: 800;
+      border-radius: 0.2rem;
+      padding: 0 2px;
+    }
+
+    @keyframes pulseAutoLink {
+      0% { box-shadow: 0 0 0 0 rgba(0, 245, 212, 0.65); }
+      100% { box-shadow: 0 0 0 10px rgba(0, 245, 212, 0); }
+    }
+    .autolink-flash {
+      animation: pulseAutoLink 0.65s ease-out;
+    }
+
     ::-webkit-scrollbar { width: 7px; height: 7px; }
     ::-webkit-scrollbar-track { background: rgba(5, 8, 17, 0.65); }
     ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.26); border-radius: 9999px; }
@@ -207,6 +289,9 @@
     <div class="orb orb-violet"></div>
     <div class="orb orb-magenta"></div>
   </div>
+
+  <!-- Portal Flutuante Único para Comboboxes Inteligentes (nunca corta em tabelas!) -->
+  <div id="neonCbPortal" class="neon-cb-portal hidden" role="listbox"></div>
 
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
@@ -424,7 +509,7 @@
                     Lumine <span class="text-cyan-400">&amp;</span> Caldas <span class="text-violet-400">OS</span>
                   </h1>
                   <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-cyan-400/10 text-cyan-300 border border-cyan-400/30">
-                    OFX + 4 Eixos + SQL
+                    Busca Inteligente + OFX + 4 Eixos
                   </span>
                 </div>
                 <p class="text-xs text-slate-400">Gestão Imobiliária PJ/PF • Caldas Novas</p>
@@ -694,18 +779,23 @@
       </div>
 
       <!-- ====================================================================
-           ABA 3: LANÇAMENTOS, IMPORTAÇÃO OFX & CLASSIFICAÇÃO COMPLETA (4 EIXOS)
+           ABA 3: LANÇAMENTOS, IMPORTAÇÃO OFX & BUSCA INTELIGENTE (4 EIXOS)
            ==================================================================== -->
       <div id="tab-entries" class="tab-panel hidden space-y-6">
 
         <section class="liquid-glass glow-cyan p-5 sm:p-6">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
             <div>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-400/15 text-cyan-300 border border-cyan-400/35">
-                Espelho Oficial • Extrato + Aba 4 CATEGORIZAÇÃO + Contajá
-              </span>
-              <h2 class="text-lg font-bold text-white mt-1">Novo Lançamento com Classificação Completa em 4 Eixos</h2>
-              <p class="text-xs text-slate-400">Suporta <strong class="text-violet-300">LUMINE PJ (BTG)</strong> e lançamentos da <strong class="text-sky-300">LUCAS PF (Conta Física)</strong>.</p>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-400/15 text-cyan-300 border border-cyan-400/35">
+                  🔍 Combobox Inteligente em Todas as Caixas
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-400/35">
+                  ⭐ Mais Usadas + Auto-Link + 🧠 Memória
+                </span>
+              </div>
+              <h2 class="text-lg font-bold text-white mt-1.5">Novo Lançamento com Classificação Completa em 4 Eixos</h2>
+              <p class="text-xs text-slate-400">Clique e <strong class="text-cyan-300">comece a digitar qualquer palavra ou código</strong> (ex.: <code class="text-cyan-300">fornec</code>, <code class="text-cyan-300">2.1.05</code>, <code class="text-cyan-300">125</code>, <code class="text-cyan-300">condom</code>) ou use as setas <code class="text-slate-300">↑ ↓ Enter</code>.</p>
             </div>
 
             <button type="button" onclick="applyArrendamentoPreset()" class="btn-neon-violet px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap self-start lg:self-auto" title="Preenche automaticamente Contratos a Pagar (2.1.05.01.09) para PIX de Arrendamento PJ -> CPF Lucas">
@@ -722,117 +812,91 @@
 
           <form id="manualEntryForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
             <div class="lg:col-span-3">
-              <label for="entryAccount" class="block text-xs font-semibold text-slate-300 mb-1.5">a) Conta / Origem *</label>
-              <select id="entryAccount" required class="glass-input w-full px-3.5 py-2.5 text-sm font-medium">
-                <option value="LUCAS PF (Conta Física)">LUCAS PF (Conta Física)</option>
-                <option value="LUMINE PJ (BTG)">LUMINE PJ (BTG)</option>
-              </select>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">a) Conta / Origem *</label>
+              <div id="cb-entryAccount"></div>
             </div>
 
             <div class="lg:col-span-3">
-              <label for="entryType" class="block text-xs font-semibold text-slate-300 mb-1.5">b) Tipo de Operação *</label>
-              <select id="entryType" required class="glass-input w-full px-3.5 py-2.5 text-sm font-semibold">
-                <option value="Crédito (Entrada)">Crédito (Entrada)</option>
-                <option value="Débito (Saída)">Débito (Saída)</option>
-              </select>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">b) Tipo de Operação *</label>
+              <div id="cb-entryType"></div>
             </div>
 
             <div class="lg:col-span-3">
-              <label for="entryUnit" class="block text-xs font-semibold text-slate-300 mb-1.5">c) Condomínio e Unidade *</label>
-              <select id="entryUnit" required class="glass-input w-full px-3.5 py-2.5 text-sm">
-                <option value="Piazza - 416">Piazza - 416 (Lucas PF)</option>
-                <option value="Spazzio - 713">Spazzio - 713 (Lucas PF)</option>
-                <option value="Lacqua V - 125">Lacqua V - 125 (Lumine PJ)</option>
-                <option value="Lacqua V - 237">Lacqua V - 237 (Lumine PJ)</option>
-                <option value="Lacqua V - 134">Lacqua V - 134 (Lumine PJ)</option>
-                <option value="Lacqua V - 246">Lacqua V - 246 (Lumine PJ)</option>
-                <option value="Piazza - 912">Piazza - 912 (Lumine PJ)</option>
-                <option value="Exclusive - 1108">Exclusive - 1108 (Avulso)</option>
-                <option value="TODAS">TODAS</option>
-              </select>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">c) Condomínio e Unidade *</label>
+              <div id="cb-entryUnit"></div>
             </div>
 
             <div class="lg:col-span-3">
               <label for="entryDate" class="block text-xs font-semibold text-slate-300 mb-1.5">Data do Movimento *</label>
-              <input type="date" id="entryDate" required value="2026-11-27" class="glass-input w-full px-3.5 py-2.5 text-sm" />
-            </div>
-
-            <div class="sm:col-span-2 lg:col-span-6">
-              <label for="entryPlanoContas" class="block text-xs font-semibold text-cyan-300 mb-1.5">
-                d) Eixo 1 — Plano de Contas (<span id="planoContasModeLabel">ENTRADAS</span>) *
-              </label>
-              <select id="entryPlanoContas" required class="glass-input w-full px-3.5 py-2.5 text-sm"></select>
+              <input type="date" id="entryDate" required value="2026-11-27" class="glass-input w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="sm:col-span-2 lg:col-span-6">
               <div class="flex items-center justify-between gap-2 mb-1.5">
-                <label for="entryGerencial" class="text-xs font-semibold text-violet-300">e) Eixo 2 — Classificação Gerencial *</label>
+                <label class="text-xs font-semibold text-cyan-300">
+                  d) Eixo 1 — Plano de Contas (<span id="planoContasModeLabel">ENTRADAS</span>) *
+                </label>
+                <span class="text-[10px] text-slate-400">Auto-preenche Gerencial &amp; PGDAS</span>
+              </div>
+              <div id="cb-entryPlanoContas"></div>
+            </div>
+
+            <div class="sm:col-span-2 lg:col-span-6">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <label class="text-xs font-semibold text-violet-300">e) Eixo 2 — Classificação Gerencial *</label>
                 <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Eixo 3 — Enquadramento RFB:</span>
               </div>
               <div class="flex flex-col sm:flex-row gap-2">
-                <select id="entryGerencial" required class="glass-input flex-1 px-3.5 py-2.5 text-sm"></select>
-                <div id="liveRfbBadge" class="px-3 py-2 rounded-xl text-[11px] font-bold border flex items-center justify-center text-center leading-tight min-h-[42px] sm:max-w-[250px]">-</div>
+                <div id="cb-entryGerencial" class="flex-1"></div>
+                <div id="liveRfbBadge" class="px-3 py-2 rounded-xl text-[11px] font-bold border flex items-center justify-center text-center leading-tight min-h-[40px] sm:max-w-[250px]">-</div>
               </div>
             </div>
 
             <div class="sm:col-span-2 lg:col-span-8">
-              <label for="entryPgdas" class="block text-xs font-semibold text-slate-300 mb-1.5">f) Eixo 4 — Atividade para PGDAS-D (Simples Nacional Anexo III) *</label>
-              <select id="entryPgdas" required class="glass-input w-full px-3.5 py-2.5 text-xs sm:text-sm"></select>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">f) Eixo 4 — Atividade para PGDAS-D (Simples Nacional Anexo III) *</label>
+              <div id="cb-entryPgdas"></div>
             </div>
 
             <div class="lg:col-span-4">
-              <label for="entryCompetenciaTipo" class="block text-xs font-semibold text-slate-300 mb-1.5">Competência (NFSe | Despesa | Receita) *</label>
-              <select id="entryCompetenciaTipo" class="glass-input w-full px-3.5 py-2.5 text-sm">
-                <option value="Receita">Receita</option>
-                <option value="Despesa">Despesa</option>
-                <option value="NFSe">NFSe</option>
-              </select>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Competência (NFSe | Despesa | Receita) *</label>
+              <div id="cb-entryCompetenciaTipo"></div>
             </div>
 
             <div class="lg:col-span-3">
               <label for="entryAmount" class="block text-xs font-semibold text-slate-300 mb-1.5">Valor (R$) *</label>
-              <input type="number" step="0.01" min="0.01" id="entryAmount" required placeholder="0,00" class="glass-input money w-full px-3.5 py-2.5 text-sm" />
+              <input type="number" step="0.01" min="0.01" id="entryAmount" required placeholder="0,00" class="glass-input money w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="lg:col-span-3">
               <label for="entryAcrescimo" class="block text-xs font-semibold text-slate-300 mb-1.5">Acréscimo p/ NFSe (R$)</label>
-              <input type="number" step="0.01" min="0" id="entryAcrescimo" placeholder="0,00" class="glass-input money w-full px-3.5 py-2.5 text-sm" />
+              <input type="number" step="0.01" min="0" id="entryAcrescimo" placeholder="0,00" class="glass-input money w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="lg:col-span-3">
               <label for="entryDocumento" class="block text-xs font-semibold text-slate-300 mb-1.5">Documento Comprobatório</label>
-              <input type="text" id="entryDocumento" placeholder="Ex: Contrato Arrendamento / PIX" class="glass-input w-full px-3.5 py-2.5 text-sm" />
+              <input type="text" id="entryDocumento" placeholder="Ex: Contrato Arrendamento / PIX" class="glass-input w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="lg:col-span-3">
-              <label for="entryMonth" class="block text-xs font-semibold text-slate-300 mb-1.5">Mês de Competência *</label>
-              <select id="entryMonth" required class="glass-input w-full px-3.5 py-2.5 text-sm">
-                <option value="11" selected>Novembro / 2026</option>
-                <option value="10">Outubro / 2026</option>
-                <option value="9">Setembro / 2026</option>
-                <option value="8">Agosto / 2026</option>
-                <option value="7">Julho / 2026</option>
-                <option value="6">Junho / 2026</option>
-                <option value="5">Maio / 2026</option>
-                <option value="4">Abril / 2026</option>
-                <option value="3">Março / 2026</option>
-                <option value="2">Fevereiro / 2026</option>
-                <option value="1">Janeiro / 2026</option>
-              </select>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">Mês de Competência *</label>
+              <div id="cb-entryMonth"></div>
             </div>
 
             <div class="sm:col-span-2 lg:col-span-6">
-              <label for="entryDescription" class="block text-xs font-semibold text-slate-300 mb-1.5">Descrição / Histórico *</label>
-              <input type="text" id="entryDescription" required placeholder="Ex: Transferência PIX do Arrendamento para o CPF do Lucas" class="glass-input w-full px-3.5 py-2.5 text-sm" />
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <label for="entryDescription" class="text-xs font-semibold text-slate-300">Descrição / Histórico *</label>
+                <span id="vendorMemoryHint" class="hidden text-[10px] font-semibold text-emerald-300">🧠 Memória de fornecedor aplicada!</span>
+              </div>
+              <input type="text" id="entryDescription" required placeholder="Ex: Transferência PIX do Arrendamento para o CPF do Lucas" class="glass-input w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="lg:col-span-4">
               <label for="entryNotes" class="block text-xs font-semibold text-slate-300 mb-1.5">Anotações</label>
-              <input type="text" id="entryNotes" placeholder="Observações..." class="glass-input w-full px-3.5 py-2.5 text-sm" />
+              <input type="text" id="entryNotes" placeholder="Observações..." class="glass-input w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="lg:col-span-2 flex items-end">
-              <button type="submit" class="btn-neon-cyan w-full py-2.5 px-4 rounded-xl text-sm font-bold">✓ Salvar</button>
+              <button type="submit" class="btn-neon-cyan w-full py-2 px-4 rounded-xl text-sm font-bold h-[40px]">✓ Salvar</button>
             </div>
           </form>
         </section>
@@ -841,11 +905,12 @@
         <section class="liquid-glass glow-violet p-5 sm:p-6 space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <h3 class="text-base font-bold text-white flex flex-wrap items-center gap-2">
                 <span>Fila de Conciliação Rápida (Extrato BTG &amp; OFX Importados)</span>
                 <span id="pendingCountText" class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-amber-500/20 text-amber-300 border border-amber-400/35">9 pendentes</span>
+                <span id="vendorMemoryBadge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">🧠 0 fornecedores memorizados</span>
               </h3>
-              <p class="text-xs text-slate-400">Os 5 PIX de Arrendamento para Lucas Parreira já estão pré-configurados como <strong class="text-cyan-300">Contratos a Pagar (2.1.05.01.09)</strong>.</p>
+              <p class="text-xs text-slate-400">Digite em qualquer caixa para filtrar. Ao conciliar, o sistema memoriza o fornecedor automaticamente para os próximos extratos.</p>
             </div>
           </div>
           <div id="pendingQueueContainer" class="space-y-3"></div>
@@ -906,7 +971,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-white/10">
-              <span class="text-xs text-slate-300">Revise as sugestões nos 4 eixos abaixo antes de importar:</span>
+              <span class="text-xs text-slate-300">Revise as sugestões nos 4 eixos abaixo (com busca digitável em cada linha):</span>
               <div class="flex flex-wrap items-center gap-2">
                 <button type="button" onclick="importOfxTransactions('queue')" class="btn-neon-violet px-3.5 py-2 rounded-xl text-xs font-bold">Enviar para Fila de Conciliação</button>
                 <button type="button" onclick="importOfxTransactions('direct')" class="btn-neon-cyan px-3.5 py-2 rounded-xl text-xs font-extrabold">Confirmar Todos Direto no Caixa</button>
@@ -921,9 +986,9 @@
                     <th class="py-2.5 px-3">Data</th>
                     <th class="py-2.5 px-3">Histórico OFX</th>
                     <th class="py-2.5 px-3 text-right">Valor</th>
-                    <th class="py-2.5 px-3">Unidade</th>
-                    <th class="py-2.5 px-3">Plano de Contas</th>
-                    <th class="py-2.5 px-3">Gerencial &amp; RFB</th>
+                    <th class="py-2.5 px-3 min-w-[145px]">Unidade</th>
+                    <th class="py-2.5 px-3 min-w-[230px]">Plano de Contas</th>
+                    <th class="py-2.5 px-3 min-w-[190px]">Gerencial &amp; RFB</th>
                   </tr>
                 </thead>
                 <tbody id="ofxPreviewTableBody" class="divide-y divide-white/5"></tbody>
@@ -936,7 +1001,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div class="flex items-center gap-2">
                 <span id="sheetFileName" class="text-xs font-mono font-semibold text-cyan-300">arquivo.xlsx</span>
-                <select id="sheetTabSelector" class="glass-input px-2.5 py-1 text-xs"></select>
+                <div id="cb-sheetTabSelector" class="w-48"></div>
               </div>
               <span id="sheetRowCount" class="text-xs text-slate-400">0 linhas lidas</span>
             </div>
@@ -948,19 +1013,16 @@
 
         <!-- Livro-Razão Completo -->
         <section class="liquid-glass p-5 sm:p-6 space-y-4">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             <div>
               <h3 class="text-base font-bold text-white">Lançamentos Classificados (Visão Completa nos 4 Eixos)</h3>
               <p class="text-xs text-slate-400">Exibe Unidade, Plano de Contas, Classificação Gerencial, Enquadramento RFB e PGDAS-D.</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-              <input type="text" id="ledgerSearchInput" placeholder="Buscar descrição, conta, unidade..." class="glass-input px-3 py-1.5 text-xs w-56" />
-              <select id="ledgerAccountFilter" class="glass-input px-3 py-1.5 text-xs">
-                <option value="all">Todas as Contas</option>
-                <option value="LUMINE PJ (BTG)">LUMINE PJ (BTG)</option>
-                <option value="LUCAS PF (Conta Física)">LUCAS PF (Conta Física)</option>
-              </select>
+              <input type="text" id="ledgerSearchInput" placeholder="Buscar descrição, conta, unidade..." class="glass-input px-3 py-1.5 text-xs w-52" />
+              <div id="cb-ledgerAccountFilter" class="w-48"></div>
+              <div id="cb-ledgerUnitFilter" class="w-44"></div>
               <span id="customLedgerCount" class="text-xs font-mono text-cyan-300 px-2">0 registros</span>
             </div>
           </div>
@@ -1142,6 +1204,7 @@
       'use strict';
 
       const STORAGE_KEY = 'lumine_caldas_os_v5_contratos_pagar';
+      const VENDOR_MEMORY_KEY = 'lumine_vendor_memory_v1';
       const AUTH_USERS_KEY = 'lumine_auth_users';
       const AUTH_SESSION_KEY = 'lumine_auth_session';
 
@@ -1245,6 +1308,42 @@
         'Piazza - 912', 'Piazza - 416', 'Spazzio - 713', 'Exclusive - 1108', 'TODAS'
       ];
 
+      // ⭐ Itens Mais Usados fixados no topo das buscas
+      const FAVORITE_SAIDAS = [
+        'Contratos a Pagar (2.1.05.01.09)',
+        'Energia Elétrica (3.2.03.01.05)',
+        'Alugueis e Condomínios (3.2.03.01.06)',
+        'Fornecedores Diversos (2.1.01.01.01)',
+        'Material de Uso e Consumo (3.2.03.01.07)',
+        'Simples Nacional (DAS) (2.1.04.01.01)',
+        'DARF folha (2.1.02.01.08)'
+      ];
+
+      const FAVORITE_ENTRADAS = [
+        'Recebimento de Clientes (1.1.02.01.01)',
+        'Rendimentos de Aplicações Financeiras (3.1.03.01.01)',
+        'Adiantamento de clientes (2.1.05.02.01)',
+        'Recebimento de Repasse de Terceiros (2.1.05.05.01)'
+      ];
+
+      const FAVORITE_GERENCIAIS = [
+        'ALUGUEL',
+        'ENERGIA',
+        'CONDOMÍNIO',
+        'HOSPEDAGEM DESC. COMISSÃO',
+        'OUTRAS DEPESAS',
+        'IMPOSTOS FEDERAIS',
+        'RECEITA'
+      ];
+
+      const FAVORITE_UNITS = [
+        'Lacqua V - 125',
+        'Lacqua V - 237',
+        'Lacqua V - 246',
+        'Piazza - 912',
+        'TODAS'
+      ];
+
       const INITIAL_UNITS = [
         { nome: 'Lacqua V - 125', regime: 'LUMINE PJ', scope: 'PJ', nota: "Condomínio L'Acqua diRoma V" },
         { nome: 'Lacqua V - 237', regime: 'LUMINE PJ', scope: 'PJ', nota: "Condomínio L'Acqua diRoma V" },
@@ -1326,7 +1425,6 @@
         { mes_num: 11, unidade: 'Piazza - 912', receita: 5871.16, condominio: 1945.23, energia: 600.85 }
       ];
 
-      // Impostos consolidados (DAS + DARF 0385): Novembro inclui R$ 1.585,14 (DAS) + R$ 178,31 (DARF 0385) = R$ 1.763,45
       const INITIAL_CLOSINGS = {
         1: { ajuste: -1845.20, imposto: 1948.12 },
         2: { ajuste: -1620.45, imposto: 1701.35 },
@@ -1366,6 +1464,7 @@
         catalogSearch: '',
         ledgerSearch: '',
         ledgerAccountFilter: 'all',
+        ledgerUnitFilter: 'all',
         units: JSON.parse(JSON.stringify(INITIAL_UNITS)),
         monthlyRecords: JSON.parse(JSON.stringify(INITIAL_MONTHLY_RECORDS)),
         closings: JSON.parse(JSON.stringify(INITIAL_CLOSINGS)),
@@ -1373,7 +1472,8 @@
         customLedger: [],
         planoEntradas: JSON.parse(JSON.stringify(INITIAL_PLANO_ENTRADAS)),
         planoSaidas: JSON.parse(JSON.stringify(INITIAL_PLANO_SAIDAS)),
-        gerencialRfb: JSON.parse(JSON.stringify(INITIAL_GERENCIAL_RFB))
+        gerencialRfb: JSON.parse(JSON.stringify(INITIAL_GERENCIAL_RFB)),
+        vendorMemory: {}
       };
 
       let currentOfxParsed = null;
@@ -1381,6 +1481,470 @@
       let currentLoggedUser = null;
       let chartHitBoxes = [];
 
+      /* ========================================================================
+         NORMALIZAÇÃO DE TEXTO (SEM ACENTO) & MOTOR DE COMBOBOX INTELIGENTE
+         ======================================================================== */
+      function normalizeText(str) {
+        return String(str || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .trim();
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // Destaca trechos correspondentes ignorando acentos e maiúsculas/minúsculas
+      function highlightMatch(label, rawQuery) {
+        const text = String(label || '');
+        const qNorm = normalizeText(rawQuery);
+        if (!qNorm) return escapeHtml(text);
+
+        // Constrói mapa de índices do texto normalizado -> texto original
+        const normChars = [];
+        const origIndices = [];
+        for (let i = 0; i < text.length; i++) {
+          const decomposed = text[i].normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+          for (let k = 0; k < decomposed.length; k++) {
+            normChars.push(decomposed[k]);
+            origIndices.push(i);
+          }
+        }
+        const normStr = normChars.join('');
+        const matchStartNorm = normStr.indexOf(qNorm);
+        if (matchStartNorm === -1) return escapeHtml(text);
+
+        const startOrig = origIndices[matchStartNorm];
+        const endOrig = origIndices[matchStartNorm + qNorm.length - 1] + 1;
+        return (
+          escapeHtml(text.slice(0, startOrig)) +
+          `<mark class="neon-cb-mark">${escapeHtml(text.slice(startOrig, endOrig))}</mark>` +
+          escapeHtml(text.slice(endOrig))
+        );
+      }
+
+      const comboboxRegistry = new Map();
+      let activeCbId = null;
+
+      function closeActiveCombobox(restoreDisplay = true) {
+        const portal = document.getElementById('neonCbPortal');
+        if (portal) portal.classList.add('hidden');
+        if (activeCbId && comboboxRegistry.has(activeCbId)) {
+          const inst = comboboxRegistry.get(activeCbId);
+          if (restoreDisplay && inst.inputEl) {
+            inst.inputEl.value = inst.getLabel(inst.value);
+          }
+        }
+        activeCbId = null;
+      }
+
+      function positionComboboxPortal(inputEl) {
+        const portal = document.getElementById('neonCbPortal');
+        if (!portal || !inputEl) return;
+        const rect = inputEl.getBoundingClientRect();
+        const viewportH = window.innerHeight;
+        const viewportW = window.innerWidth;
+        const desiredWidth = Math.max(rect.width, Math.min(380, viewportW - 24));
+        const left = Math.min(viewportW - desiredWidth - 12, Math.max(12, rect.left));
+        const spaceBelow = viewportH - rect.bottom - 12;
+        const spaceAbove = rect.top - 12;
+
+        portal.style.width = `${desiredWidth}px`;
+        portal.style.left = `${left}px`;
+
+        if (spaceBelow < 210 && spaceAbove > spaceBelow) {
+          portal.style.top = 'auto';
+          portal.style.bottom = `${viewportH - rect.top + 6}px`;
+        } else {
+          portal.style.bottom = 'auto';
+          portal.style.top = `${rect.bottom + 6}px`;
+        }
+      }
+
+      function renderComboboxDropdown(id, queryText) {
+        const inst = comboboxRegistry.get(id);
+        const portal = document.getElementById('neonCbPortal');
+        if (!inst || !portal) return;
+
+        const qNorm = normalizeText(queryText);
+        const flatMatches = [];
+        let html = '';
+
+        // Grupo ⭐ Mais Usadas apenas quando não há filtro digitado
+        if (!qNorm && Array.isArray(inst.favorites) && inst.favorites.length > 0) {
+          const allOptionsMap = new Map();
+          inst.groups.forEach(g => g.items.forEach(it => allOptionsMap.set(it.value, it)));
+          const favItems = inst.favorites.map(fv => allOptionsMap.get(fv)).filter(Boolean);
+          if (favItems.length > 0) {
+            html += `<div class="neon-cb-group fav-group">⭐ Mais Usadas</div>`;
+            favItems.forEach(it => {
+              const idx = flatMatches.length;
+              flatMatches.push(it);
+              const isSel = it.value === inst.value;
+              html += `<div class="neon-cb-item ${isSel ? 'selected' : ''}" data-cb-idx="${idx}" data-cb-val="${escapeHtml(it.value)}">
+                <span class="truncate">${escapeHtml(it.label)}</span>
+                ${isSel ? '<span class="text-[10px] text-cyan-300 font-bold shrink-0">✓</span>' : ''}
+              </div>`;
+            });
+          }
+        }
+
+        inst.groups.forEach(g => {
+          const groupMatches = g.items.filter(it => {
+            if (!qNorm) return true;
+            return normalizeText(it.label).includes(qNorm) || normalizeText(g.label).includes(qNorm);
+          });
+          if (groupMatches.length === 0) return;
+
+          if (g.label) {
+            html += `<div class="neon-cb-group">${highlightMatch(g.label, queryText)}</div>`;
+          }
+          groupMatches.forEach(it => {
+            const idx = flatMatches.length;
+            flatMatches.push(it);
+            const isSel = it.value === inst.value;
+            html += `<div class="neon-cb-item ${isSel ? 'selected' : ''}" data-cb-idx="${idx}" data-cb-val="${escapeHtml(it.value)}">
+              <span class="truncate">${highlightMatch(it.label, queryText)}</span>
+              ${isSel ? '<span class="text-[10px] text-cyan-300 font-bold shrink-0">✓</span>' : ''}
+            </div>`;
+          });
+        });
+
+        if (flatMatches.length === 0) {
+          html = `<div class="p-4 text-center text-xs text-slate-400">Nenhuma opção encontrada para "<strong class="text-cyan-300">${escapeHtml(queryText)}</strong>".</div>`;
+        }
+
+        inst.visibleItems = flatMatches;
+        inst.highlightedIndex = flatMatches.length > 0 ? 0 : -1;
+
+        portal.innerHTML = `<div class="neon-cb-list">${html}</div>`;
+        portal.classList.remove('hidden');
+        positionComboboxPortal(inst.inputEl);
+        updateHighlightedRowInPortal(id);
+
+        portal.querySelectorAll('.neon-cb-item').forEach(el => {
+          el.addEventListener('mousedown', e => {
+            e.preventDefault();
+            const val = el.getAttribute('data-cb-val');
+            selectComboboxValue(id, val, true);
+          });
+        });
+      }
+
+      function updateHighlightedRowInPortal(id) {
+        const inst = comboboxRegistry.get(id);
+        const portal = document.getElementById('neonCbPortal');
+        if (!inst || !portal) return;
+        const rows = portal.querySelectorAll('.neon-cb-item');
+        rows.forEach((row, i) => {
+          const isHi = i === inst.highlightedIndex;
+          row.classList.toggle('highlighted', isHi);
+          if (isHi) row.scrollIntoView({ block: 'nearest' });
+        });
+      }
+
+      function selectComboboxValue(id, newValue, triggerCallback = true) {
+        const inst = comboboxRegistry.get(id);
+        if (!inst) return;
+        inst.value = newValue;
+        if (inst.inputEl) {
+          inst.inputEl.value = inst.getLabel(newValue);
+        }
+        closeActiveCombobox(false);
+        if (triggerCallback && typeof inst.onChange === 'function') {
+          inst.onChange(newValue);
+        }
+      }
+
+      function createNeonCombobox(containerOrId, config) {
+        const container = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
+        if (!container) return null;
+
+        const id = config.id;
+        const compact = Boolean(config.compact);
+        const disabled = Boolean(config.disabled);
+
+        function getLabel(val) {
+          for (const g of config.groups) {
+            const found = g.items.find(it => it.value === val);
+            if (found) return found.label;
+          }
+          return val || '';
+        }
+
+        const inst = {
+          id,
+          container,
+          groups: config.groups || [],
+          favorites: config.favorites || [],
+          value: config.value || '',
+          onChange: config.onChange || null,
+          getLabel,
+          visibleItems: [],
+          highlightedIndex: -1,
+          inputEl: null
+        };
+
+        const padClass = compact ? 'pl-2.5 pr-11 py-1 text-[11px]' : 'pl-3 pr-12 py-2 text-xs sm:text-sm';
+        container.innerHTML = `
+          <div class="relative w-full">
+            <input
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              ${disabled ? 'disabled' : ''}
+              placeholder="${escapeHtml(config.placeholder || 'Clique ou digite para buscar...')}"
+              value="${escapeHtml(getLabel(inst.value))}"
+              title="${escapeHtml(getLabel(inst.value))}"
+              class="glass-input w-full ${padClass} truncate ${disabled ? 'opacity-50 cursor-not-allowed' : ''}"
+            />
+            ${disabled ? '' : `
+              <button type="button" tabindex="-1" class="cb-clear-btn absolute inset-y-0 right-6 px-1 flex items-center text-slate-400 hover:text-rose-300 text-[11px]" title="Limpar e pesquisar">✕</button>
+              <button type="button" tabindex="-1" class="cb-toggle-btn absolute inset-y-0 right-1.5 px-1 flex items-center text-cyan-300/80 hover:text-cyan-300 text-xs" title="Abrir lista">▾</button>
+            `}
+          </div>
+        `;
+
+        const inputEl = container.querySelector('input');
+        inst.inputEl = inputEl;
+        comboboxRegistry.set(id, inst);
+
+        if (!disabled) {
+          inputEl.addEventListener('focus', () => {
+            activeCbId = id;
+            inputEl.select();
+            renderComboboxDropdown(id, '');
+          });
+
+          inputEl.addEventListener('click', () => {
+            if (activeCbId !== id) {
+              activeCbId = id;
+              inputEl.select();
+              renderComboboxDropdown(id, '');
+            }
+          });
+
+          inputEl.addEventListener('input', () => {
+            activeCbId = id;
+            renderComboboxDropdown(id, inputEl.value);
+          });
+
+          inputEl.addEventListener('keydown', e => {
+            if (activeCbId !== id) {
+              if (e.key === 'ArrowDown' || e.key === 'Enter') {
+                e.preventDefault();
+                activeCbId = id;
+                renderComboboxDropdown(id, '');
+              }
+              return;
+            }
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              if (inst.visibleItems.length > 0) {
+                inst.highlightedIndex = (inst.highlightedIndex + 1) % inst.visibleItems.length;
+                updateHighlightedRowInPortal(id);
+              }
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              if (inst.visibleItems.length > 0) {
+                inst.highlightedIndex = (inst.highlightedIndex - 1 + inst.visibleItems.length) % inst.visibleItems.length;
+                updateHighlightedRowInPortal(id);
+              }
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              if (inst.highlightedIndex >= 0 && inst.visibleItems[inst.highlightedIndex]) {
+                selectComboboxValue(id, inst.visibleItems[inst.highlightedIndex].value, true);
+              } else {
+                closeActiveCombobox(true);
+              }
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              closeActiveCombobox(true);
+            } else if (e.key === 'Tab') {
+              closeActiveCombobox(true);
+            }
+          });
+
+          const clearBtn = container.querySelector('.cb-clear-btn');
+          if (clearBtn) {
+            clearBtn.addEventListener('mousedown', e => {
+              e.preventDefault();
+              activeCbId = id;
+              inputEl.value = '';
+              inputEl.focus();
+              renderComboboxDropdown(id, '');
+            });
+          }
+
+          const toggleBtn = container.querySelector('.cb-toggle-btn');
+          if (toggleBtn) {
+            toggleBtn.addEventListener('mousedown', e => {
+              e.preventDefault();
+              if (activeCbId === id) {
+                closeActiveCombobox(true);
+              } else {
+                activeCbId = id;
+                inputEl.focus();
+                inputEl.select();
+                renderComboboxDropdown(id, '');
+              }
+            });
+          }
+        }
+
+        return inst;
+      }
+
+      function setComboboxValue(id, newValue, triggerCallback = false) {
+        const inst = comboboxRegistry.get(id);
+        if (!inst) return;
+        inst.value = newValue;
+        if (inst.inputEl) {
+          inst.inputEl.value = inst.getLabel(newValue);
+          inst.inputEl.title = inst.getLabel(newValue);
+        }
+        if (triggerCallback && typeof inst.onChange === 'function') {
+          inst.onChange(newValue);
+        }
+      }
+
+      function getComboboxValue(id) {
+        const inst = comboboxRegistry.get(id);
+        return inst ? inst.value : '';
+      }
+
+      document.addEventListener('mousedown', e => {
+        if (!activeCbId) return;
+        const portal = document.getElementById('neonCbPortal');
+        const inst = comboboxRegistry.get(activeCbId);
+        if (portal && portal.contains(e.target)) return;
+        if (inst && inst.container && inst.container.contains(e.target)) return;
+        closeActiveCombobox(true);
+      });
+
+      window.addEventListener('scroll', () => {
+        if (activeCbId && comboboxRegistry.has(activeCbId)) {
+          positionComboboxPortal(comboboxRegistry.get(activeCbId).inputEl);
+        }
+      }, true);
+
+      window.addEventListener('resize', () => {
+        if (activeCbId && comboboxRegistry.has(activeCbId)) {
+          positionComboboxPortal(comboboxRegistry.get(activeCbId).inputEl);
+        }
+      });
+
+      /* ========================================================================
+         🔗 AUTO-LINK ENTRE EIXOS (PLANO DE CONTAS -> GERENCIAL -> RFB -> PGDAS)
+         ======================================================================== */
+      function getAutoLinkedClassification(planoConta) {
+        const p = normalizeText(planoConta);
+        if (!p) return null;
+
+        if (p.includes('2.1.05.01.09') || p.includes('contratos a pagar')) {
+          return { gerencial: 'ALUGUEL', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('energia')) {
+          return { gerencial: 'ENERGIA', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('alugueis e condominios') || p.includes('condominio')) {
+          return { gerencial: 'CONDOMÍNIO', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('recebimento de clientes') || p.includes('adiantamento de clientes')) {
+          return { gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0], compTipo: 'Receita' };
+        }
+        if (p.includes('rendimentos de aplicacoes') || p.includes('outras receitas')) {
+          return { gerencial: 'RECEITA', pgdas: 'Não se aplica', compTipo: 'Receita' };
+        }
+        if (p.includes('simples nacional') || p.includes('darf') || p.includes('inss') || p.includes('fgts') || p.includes('cofins') || p.includes('impostos e taxas federais')) {
+          return { gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('iptu') || p.includes('alvara') || p.includes('impostos e taxas municipais')) {
+          return { gerencial: 'IMPOSTOS E TAXAS MUNICIPAIS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('icms') || p.includes('ipva') || p.includes('impostos e taxas estaduais')) {
+          return { gerencial: 'IMPOSTOS ESTADUAIS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('distribuicao de lucros')) {
+          return { gerencial: 'DIVIDENDOS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('fornecedores diversos') || p.includes('material de uso') || p.includes('manutencao') || p.includes('limpeza') || p.includes('despesas gerais') || p.includes('taxas bancarias') || p.includes('iof') || p.includes('honorario')) {
+          return { gerencial: 'OUTRAS DEPESAS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        if (p.includes('financiamentos bancarios')) {
+          return { gerencial: 'FINANCIAMENTO IMOB.', pgdas: 'Não se aplica', compTipo: 'Despesa' };
+        }
+        return null;
+      }
+
+      /* ========================================================================
+         🧠 MEMÓRIA DE FORNECEDOR / HISTÓRICO (APRENDIZADO CONTÍNUO)
+         ======================================================================== */
+      function extractVendorKey(rawDesc) {
+        let s = normalizeText(rawDesc);
+        s = s
+          .replace(/^transferencia pix do arrendamento para o cpf do lucas.*$/, 'arrendamento cpf lucas')
+          .replace(/^pix enviado para\s+/, '')
+          .replace(/^transf pix recebida\s*-\s*/, '')
+          .replace(/^pix recebido de\s+/, '')
+          .replace(/^pagamento de conta \/ tributo\s*-\s*/, '')
+          .replace(/\s*-\s*e\d{10,}.*$/, '')
+          .replace(/\(pedido[^)]*\)/g, '')
+          .replace(/\(comp\.?[^)]*\)/g, '')
+          .replace(/\(ref\.?[^)]*\)/g, '')
+          .replace(/[^a-z0-9\s]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        const words = s.split(' ').filter(w => w.length >= 2);
+        const key = words.slice(0, 3).join(' ');
+        return key.length >= 5 ? key : '';
+      }
+
+      function saveVendorMemoryEntry(descricao, classification) {
+        const key = extractVendorKey(descricao);
+        if (!key) return;
+        state.vendorMemory[key] = {
+          unidade: classification.unidade,
+          plano: classification.plano,
+          gerencial: classification.gerencial,
+          pgdas: classification.pgdas || 'Não se aplica',
+          updatedAt: new Date().toISOString()
+        };
+        try {
+          localStorage.setItem(VENDOR_MEMORY_KEY, JSON.stringify(state.vendorMemory));
+        } catch (e) {}
+        updateVendorMemoryBadge();
+      }
+
+      function findVendorMemory(descricao) {
+        const key = extractVendorKey(descricao);
+        if (!key) return null;
+        if (state.vendorMemory[key]) return { key, ...state.vendorMemory[key] };
+        for (const savedKey of Object.keys(state.vendorMemory)) {
+          if (key.includes(savedKey) || savedKey.includes(key)) {
+            return { key: savedKey, ...state.vendorMemory[savedKey] };
+          }
+        }
+        return null;
+      }
+
+      function updateVendorMemoryBadge() {
+        const badge = document.getElementById('vendorMemoryBadge');
+        if (!badge) return;
+        const count = Object.keys(state.vendorMemory || {}).length;
+        badge.textContent = `🧠 ${count} fornecedor${count === 1 ? '' : 'es'} memorizado${count === 1 ? '' : 's'}`;
+      }
+
+      /* ========================================================================
+         PERSISTÊNCIA DE ESTADO
+         ======================================================================== */
       function saveState() {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -1399,23 +1963,27 @@
       function loadState() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('lumine_caldas_os_v4_das_darf');
-          if (!raw) return;
-          const saved = JSON.parse(raw);
-          if (Array.isArray(saved.units)) state.units = saved.units;
-          if (Array.isArray(saved.monthlyRecords)) state.monthlyRecords = saved.monthlyRecords;
-          if (saved.closings) state.closings = saved.closings;
-          if (Array.isArray(saved.pendingQueue)) state.pendingQueue = saved.pendingQueue;
-          if (Array.isArray(saved.customLedger)) state.customLedger = saved.customLedger;
-          if (Array.isArray(saved.planoEntradas)) state.planoEntradas = saved.planoEntradas;
-          if (Array.isArray(saved.planoSaidas)) state.planoSaidas = saved.planoSaidas;
-          if (Array.isArray(saved.gerencialRfb)) state.gerencialRfb = saved.gerencialRfb;
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (Array.isArray(saved.units)) state.units = saved.units;
+            if (Array.isArray(saved.monthlyRecords)) state.monthlyRecords = saved.monthlyRecords;
+            if (saved.closings) state.closings = saved.closings;
+            if (Array.isArray(saved.pendingQueue)) state.pendingQueue = saved.pendingQueue;
+            if (Array.isArray(saved.customLedger)) state.customLedger = saved.customLedger;
+            if (Array.isArray(saved.planoEntradas)) state.planoEntradas = saved.planoEntradas;
+            if (Array.isArray(saved.planoSaidas)) state.planoSaidas = saved.planoSaidas;
+            if (Array.isArray(saved.gerencialRfb)) state.gerencialRfb = saved.gerencialRfb;
+          }
 
-          // Garantir que Contratos a Pagar (2.1.05.01.09) esteja presente mesmo em sessões já salvas
+          const rawMem = localStorage.getItem(VENDOR_MEMORY_KEY);
+          if (rawMem) {
+            state.vendorMemory = JSON.parse(rawMem) || {};
+          }
+
           const despGrp = state.planoSaidas.find(g => g.grupo === 'DESPESAS OPERACIONAIS');
           if (despGrp && !despGrp.contas.includes('Contratos a Pagar (2.1.05.01.09)')) {
             despGrp.contas.unshift('Contratos a Pagar (2.1.05.01.09)');
           }
-          // Atualizar sugestões pendentes de arrendamento para 2.1.05.01.09
           state.pendingQueue.forEach(p => {
             if ((p.descricao || '').toLowerCase().includes('arrendamento')) {
               p.sugPlano = 'Contratos a Pagar (2.1.05.01.09)';
@@ -1542,6 +2110,7 @@
       }
 
       window.lockApplication = function () {
+        closeActiveCombobox(true);
         localStorage.removeItem(AUTH_SESSION_KEY);
         sessionStorage.removeItem(AUTH_SESSION_KEY);
         currentLoggedUser = null;
@@ -1853,7 +2422,9 @@
           </tr>`;
       }
 
-      /* ---------------- 4 EIXOS & CONCILIAÇÃO ---------------- */
+      /* ========================================================================
+         4 EIXOS, COMBOBOXES INTELIGENTES DA ABA 3 & CONCILIAÇÃO
+         ======================================================================== */
       function getRfbForGerencial(gerencialName) {
         const found = state.gerencialRfb.find(g => g.gerencial === gerencialName);
         return found ? found.rfb : '-';
@@ -1867,25 +2438,47 @@
         return 'bg-cyan-500/15 text-cyan-300 border-cyan-400/35';
       }
 
-      function buildPlanoContasOptionsHtml(isEntrada, selectedValue) {
+      function getPlanoContasGroupsForCb(isEntrada) {
         const groups = isEntrada ? state.planoEntradas : state.planoSaidas;
-        return groups.map(g => `<optgroup label="${g.grupo}">${g.contas.map(c => `<option value="${c}" ${c === selectedValue ? 'selected' : ''}>${c}</option>`).join('')}</optgroup>`).join('');
+        return groups.map(g => ({
+          label: g.grupo,
+          items: g.contas.map(c => ({ value: c, label: c }))
+        }));
       }
 
-      function buildGerencialOptionsHtml(selectedValue) {
-        return state.gerencialRfb.map(g => `<option value="${g.gerencial}" ${g.gerencial === selectedValue ? 'selected' : ''}>${g.gerencial}</option>`).join('');
+      function getGerencialGroupsForCb() {
+        return [{
+          label: 'Classificações Gerenciais (Aba 4)',
+          items: state.gerencialRfb.map(g => ({ value: g.gerencial, label: g.gerencial }))
+        }];
       }
 
-      function buildPgdasOptionsHtml(selectedValue) {
-        return PGDAS_OPTIONS.map(p => `<option value="${p}" ${p === selectedValue ? 'selected' : ''}>${p}</option>`).join('');
+      function getUnitGroupsForCb() {
+        return [{
+          label: 'Condomínios e Unidades',
+          items: [
+            { value: 'Lacqua V - 125', label: 'Lacqua V - 125 (Lumine PJ)' },
+            { value: 'Lacqua V - 237', label: 'Lacqua V - 237 (Lumine PJ)' },
+            { value: 'Lacqua V - 246', label: 'Lacqua V - 246 (Lumine PJ)' },
+            { value: 'Lacqua V - 134', label: 'Lacqua V - 134 (Lumine PJ)' },
+            { value: 'Piazza - 912', label: 'Piazza - 912 (Lumine PJ)' },
+            { value: 'Piazza - 416', label: 'Piazza - 416 (Lucas PF)' },
+            { value: 'Spazzio - 713', label: 'Spazzio - 713 (Lucas PF)' },
+            { value: 'Exclusive - 1108', label: 'Exclusive - 1108 (Avulso)' },
+            { value: 'TODAS', label: 'TODAS (Rateio / Geral)' }
+          ]
+        }];
       }
 
-      function buildUnitOptionsHtml(selectedValue) {
-        return UNITS_DROPDOWN.map(u => `<option value="${u}" ${u === selectedValue ? 'selected' : ''}>${u}</option>`).join('');
+      function getUnitGroupsCompactForCb() {
+        return [{
+          label: 'Unidades',
+          items: UNITS_DROPDOWN.map(u => ({ value: u, label: u }))
+        }];
       }
 
       function checkContajaRuleBanner() {
-        const planoVal = document.getElementById('entryPlanoContas').value || '';
+        const planoVal = getComboboxValue('entryPlanoContas') || '';
         const banner = document.getElementById('contajaRuleBanner');
         if (planoVal.includes('2.1.05.01.09') || planoVal.includes('Contratos a Pagar')) {
           banner.classList.remove('hidden');
@@ -1894,16 +2487,169 @@
         }
       }
 
-      window.applyArrendamentoPreset = function () {
-        document.getElementById('entryAccount').value = 'LUMINE PJ (BTG)';
-        document.getElementById('entryType').value = 'Débito (Saída)';
+      function updateLiveRfbBadge(flash = false) {
+        const gerVal = getComboboxValue('entryGerencial');
+        const rfbText = getRfbForGerencial(gerVal);
+        const badge = document.getElementById('liveRfbBadge');
+        badge.textContent = rfbText;
+        badge.className = `px-3 py-2 rounded-xl text-[11px] font-bold border flex items-center justify-center text-center leading-tight min-h-[40px] sm:max-w-[260px] ${getRfbBadgeStyle(rfbText)}`;
+        if (flash) {
+          badge.classList.remove('autolink-flash');
+          void badge.offsetWidth;
+          badge.classList.add('autolink-flash');
+        }
+      }
+
+      function initFormComboboxes() {
+        createNeonCombobox('cb-entryAccount', {
+          id: 'entryAccount',
+          value: 'LUCAS PF (Conta Física)',
+          placeholder: 'Selecione a conta...',
+          groups: [{
+            label: 'Contas Bancárias / Carteiras',
+            items: [
+              { value: 'LUCAS PF (Conta Física)', label: 'LUCAS PF (Conta Física)' },
+              { value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }
+            ]
+          }]
+        });
+
+        createNeonCombobox('cb-entryType', {
+          id: 'entryType',
+          value: 'Crédito (Entrada)',
+          placeholder: 'Crédito ou Débito...',
+          groups: [{
+            label: 'Natureza da Movimentação',
+            items: [
+              { value: 'Crédito (Entrada)', label: 'Crédito (Entrada)' },
+              { value: 'Débito (Saída)', label: 'Débito (Saída)' }
+            ]
+          }],
+          onChange: () => syncFormClassificationDropdowns()
+        });
+
+        createNeonCombobox('cb-entryUnit', {
+          id: 'entryUnit',
+          value: 'Piazza - 416',
+          placeholder: 'Digite apartamento (ex: 125, piazza, todas)...',
+          favorites: FAVORITE_UNITS,
+          groups: getUnitGroupsForCb()
+        });
+
+        createNeonCombobox('cb-entryPgdas', {
+          id: 'entryPgdas',
+          value: PGDAS_OPTIONS[0],
+          placeholder: 'Digite regra PGDAS-D...',
+          groups: [{
+            label: 'Atividades PGDAS-D (Anexo III)',
+            items: PGDAS_OPTIONS.map(p => ({ value: p, label: p }))
+          }]
+        });
+
+        createNeonCombobox('cb-entryCompetenciaTipo', {
+          id: 'entryCompetenciaTipo',
+          value: 'Receita',
+          placeholder: 'Receita, Despesa ou NFSe...',
+          groups: [{
+            label: 'Tipo de Competência',
+            items: [
+              { value: 'Receita', label: 'Receita' },
+              { value: 'Despesa', label: 'Despesa' },
+              { value: 'NFSe', label: 'NFSe' }
+            ]
+          }]
+        });
+
+        createNeonCombobox('cb-entryMonth', {
+          id: 'entryMonth',
+          value: '11',
+          placeholder: 'Digite o mês...',
+          groups: [{
+            label: 'Competência 2026',
+            items: [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(m => ({
+              value: String(m),
+              label: `${MONTH_NAMES[m]} / 2026`
+            }))
+          }]
+        });
+
+        createNeonCombobox('cb-ledgerAccountFilter', {
+          id: 'ledgerAccountFilter',
+          value: 'all',
+          compact: true,
+          placeholder: 'Filtrar conta...',
+          groups: [{
+            label: 'Filtrar por Conta',
+            items: [
+              { value: 'all', label: 'Todas as Contas' },
+              { value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' },
+              { value: 'LUCAS PF (Conta Física)', label: 'LUCAS PF (Conta Física)' }
+            ]
+          }],
+          onChange: val => { state.ledgerAccountFilter = val; renderCustomLedger(); }
+        });
+
+        createNeonCombobox('cb-ledgerUnitFilter', {
+          id: 'ledgerUnitFilter',
+          value: 'all',
+          compact: true,
+          placeholder: 'Filtrar unidade...',
+          favorites: ['all', ...FAVORITE_UNITS],
+          groups: [{
+            label: 'Filtrar por Unidade',
+            items: [{ value: 'all', label: 'Todas as Unidades' }, ...UNITS_DROPDOWN.map(u => ({ value: u, label: u }))]
+          }],
+          onChange: val => { state.ledgerUnitFilter = val; renderCustomLedger(); }
+        });
+
         syncFormClassificationDropdowns();
-        document.getElementById('entryUnit').value = 'Lacqua V - 125';
-        document.getElementById('entryPlanoContas').value = 'Contratos a Pagar (2.1.05.01.09)';
-        document.getElementById('entryGerencial').value = 'ALUGUEL';
-        updateLiveRfbBadge();
-        document.getElementById('entryPgdas').value = 'Não se aplica';
-        document.getElementById('entryCompetenciaTipo').value = 'Despesa';
+      }
+
+      function syncFormClassificationDropdowns() {
+        const isEntrada = (getComboboxValue('entryType') || '').includes('Crédito');
+        document.getElementById('planoContasModeLabel').textContent = isEntrada ? 'ENTRADAS' : 'SAÍDAS';
+
+        const defaultPlano = isEntrada ? 'Recebimento de Clientes (1.1.02.01.01)' : 'Contratos a Pagar (2.1.05.01.09)';
+        createNeonCombobox('cb-entryPlanoContas', {
+          id: 'entryPlanoContas',
+          value: defaultPlano,
+          placeholder: 'Digite nome ou código (ex: fornec, 2.1.05, energia)...',
+          favorites: isEntrada ? FAVORITE_ENTRADAS : FAVORITE_SAIDAS,
+          groups: getPlanoContasGroupsForCb(isEntrada),
+          onChange: selectedPlano => {
+            checkContajaRuleBanner();
+            const linked = getAutoLinkedClassification(selectedPlano);
+            if (linked) {
+              setComboboxValue('entryGerencial', linked.gerencial, false);
+              setComboboxValue('entryPgdas', linked.pgdas, false);
+              setComboboxValue('entryCompetenciaTipo', linked.compTipo, false);
+              updateLiveRfbBadge(true);
+            }
+          }
+        });
+
+        const defaultGer = isEntrada ? 'HOSPEDAGEM DESC. COMISSÃO' : 'ALUGUEL';
+        createNeonCombobox('cb-entryGerencial', {
+          id: 'entryGerencial',
+          value: defaultGer,
+          placeholder: 'Digite classificação gerencial...',
+          favorites: FAVORITE_GERENCIAIS,
+          groups: getGerencialGroupsForCb(),
+          onChange: () => updateLiveRfbBadge(true)
+        });
+
+        updateLiveRfbBadge(false);
+        setComboboxValue('entryPgdas', isEntrada ? PGDAS_OPTIONS[0] : 'Não se aplica', false);
+        setComboboxValue('entryCompetenciaTipo', isEntrada ? 'Receita' : 'Despesa', false);
+        checkContajaRuleBanner();
+      }
+
+      window.applyArrendamentoPreset = function () {
+        setComboboxValue('entryAccount', 'LUMINE PJ (BTG)', false);
+        setComboboxValue('entryType', 'Débito (Saída)', false);
+        syncFormClassificationDropdowns();
+        setComboboxValue('entryUnit', 'Lacqua V - 125', false);
+        setComboboxValue('entryPlanoContas', 'Contratos a Pagar (2.1.05.01.09)', true);
         document.getElementById('entryDocumento').value = 'Contrato Arrendamento / PIX';
         document.getElementById('entryDescription').value = 'Transferência PIX do Arrendamento para o CPF do Lucas';
         document.getElementById('entryNotes').value = 'Contajá: Contratos a Pagar 2.1.05.01.09 (não usar Distribuição de Lucros)';
@@ -1911,24 +2657,6 @@
         document.getElementById('entryAmount').focus();
         showToast('Regra Contajá Aplicada!', 'Preenchido como Contratos a Pagar (2.1.05.01.09). Informe o valor e selecione o apartamento.', 'violet');
       };
-
-      function syncFormClassificationDropdowns() {
-        const isEntrada = document.getElementById('entryType').value.includes('Crédito');
-        document.getElementById('planoContasModeLabel').textContent = isEntrada ? 'ENTRADAS' : 'SAÍDAS';
-        document.getElementById('entryPlanoContas').innerHTML = buildPlanoContasOptionsHtml(isEntrada, isEntrada ? 'Recebimento de Clientes (1.1.02.01.01)' : 'Contratos a Pagar (2.1.05.01.09)');
-        const gerSel = document.getElementById('entryGerencial');
-        gerSel.innerHTML = buildGerencialOptionsHtml(isEntrada ? 'HOSPEDAGEM DESC. COMISSÃO' : 'DESPESA');
-        updateLiveRfbBadge();
-        document.getElementById('entryPgdas').innerHTML = buildPgdasOptionsHtml(isEntrada ? PGDAS_OPTIONS[0] : 'Não se aplica');
-        checkContajaRuleBanner();
-      }
-
-      function updateLiveRfbBadge() {
-        const rfbText = getRfbForGerencial(document.getElementById('entryGerencial').value);
-        const badge = document.getElementById('liveRfbBadge');
-        badge.textContent = rfbText;
-        badge.className = `px-3 py-2 rounded-xl text-[11px] font-bold border flex items-center justify-center text-center leading-tight min-h-[42px] sm:max-w-[260px] ${getRfbBadgeStyle(rfbText)}`;
-      }
 
       function applyEntryToMonthlyDashboard(entry) {
         if (entry.jaContabilizadoNoFechamento) return;
@@ -1961,6 +2689,7 @@
         const count = state.pendingQueue.length;
         document.getElementById('pendingBadge').textContent = String(count);
         document.getElementById('pendingCountText').textContent = `${count} pendente${count === 1 ? '' : 's'}`;
+        updateVendorMemoryBadge();
 
         if (count === 0) {
           container.innerHTML = `<div class="p-6 rounded-xl bg-emerald-950/20 border border-emerald-400/25 text-center"><div class="text-sm font-bold text-emerald-300">✅ Todos os lançamentos da fila foram conciliados!</div></div>`;
@@ -1969,6 +2698,11 @@
 
         container.innerHTML = state.pendingQueue.map(item => {
           const isCredit = item.tipo.includes('Crédito');
+          const memMatch = findVendorMemory(item.descricao);
+          const effUnit = memMatch ? memMatch.unidade : item.sugUnidade;
+          const effPlano = memMatch ? memMatch.plano : item.sugPlano;
+          const effGer = memMatch ? memMatch.gerencial : item.sugGerencial;
+
           return `
             <div class="p-4 rounded-xl bg-slate-950/70 border border-white/10 space-y-3">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1976,35 +2710,92 @@
                   <span class="font-mono text-xs text-slate-400">${item.data}</span>
                   <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isCredit ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/35' : 'bg-pink-500/20 text-pink-300 border border-pink-400/35'}">${item.tipo}</span>
                   <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">FITID: ${item.fitid || 'MANUAL'}</span>
+                  ${memMatch ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">🧠 Memória Aprendida</span>' : ''}
                   <span class="font-bold text-sm text-white">${item.descricao}</span>
                 </div>
                 <div class="money text-base font-extrabold ${isCredit ? 'text-cyan-300' : 'text-pink-300'}">${formatBRL(item.valor)}</div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-end">
-                <div class="lg:col-span-2"><label class="block text-[10px] text-slate-400 mb-1">Unidade</label><select id="p-unit-${item.id}" class="glass-input w-full px-2.5 py-1.5 text-xs">${buildUnitOptionsHtml(item.sugUnidade)}</select></div>
-                <div class="lg:col-span-4"><label class="block text-[10px] text-cyan-300 mb-1">Plano de Contas</label><select id="p-plano-${item.id}" class="glass-input w-full px-2.5 py-1.5 text-xs">${buildPlanoContasOptionsHtml(isCredit, item.sugPlano)}</select></div>
-                <div class="lg:col-span-3"><label class="block text-[10px] text-violet-300 mb-1">Gerencial</label><select id="p-ger-${item.id}" class="glass-input w-full px-2.5 py-1.5 text-xs">${buildGerencialOptionsHtml(item.sugGerencial)}</select></div>
+                <div class="lg:col-span-2">
+                  <label class="block text-[10px] text-slate-400 mb-1">Unidade</label>
+                  <div id="cb-p-unit-${item.id}"></div>
+                </div>
+                <div class="lg:col-span-4">
+                  <label class="block text-[10px] text-cyan-300 mb-1">Plano de Contas</label>
+                  <div id="cb-p-plano-${item.id}"></div>
+                </div>
+                <div class="lg:col-span-3">
+                  <label class="block text-[10px] text-violet-300 mb-1">Gerencial</label>
+                  <div id="cb-p-ger-${item.id}"></div>
+                </div>
                 <div class="lg:col-span-3 flex items-center gap-2">
-                  <button type="button" onclick="confirmPendingItem('${item.id}')" class="btn-neon-cyan flex-1 py-2 px-3 rounded-xl text-xs font-bold">✓ Conciliar</button>
-                  <button type="button" onclick="dismissPendingItem('${item.id}')" class="px-2.5 py-2 rounded-xl text-xs text-slate-400 hover:text-rose-300 border border-white/10">✕</button>
+                  <button type="button" onclick="confirmPendingItem('${item.id}')" class="btn-neon-cyan flex-1 py-2 px-3 rounded-xl text-xs font-bold h-[34px]">✓ Conciliar</button>
+                  <button type="button" onclick="dismissPendingItem('${item.id}')" class="px-2.5 py-2 rounded-xl text-xs text-slate-400 hover:text-rose-300 border border-white/10 h-[34px]">✕</button>
                 </div>
               </div>
             </div>`;
         }).join('');
+
+        // Monta os Comboboxes Inteligentes de cada linha da Fila
+        state.pendingQueue.forEach(item => {
+          const isCredit = item.tipo.includes('Crédito');
+          const memMatch = findVendorMemory(item.descricao);
+          const effUnit = memMatch ? memMatch.unidade : item.sugUnidade;
+          const effPlano = memMatch ? memMatch.plano : item.sugPlano;
+          const effGer = memMatch ? memMatch.gerencial : item.sugGerencial;
+
+          createNeonCombobox(`cb-p-unit-${item.id}`, {
+            id: `p-unit-${item.id}`,
+            value: effUnit,
+            compact: true,
+            placeholder: 'Unidade...',
+            favorites: FAVORITE_UNITS,
+            groups: getUnitGroupsCompactForCb()
+          });
+
+          createNeonCombobox(`cb-p-plano-${item.id}`, {
+            id: `p-plano-${item.id}`,
+            value: effPlano,
+            compact: true,
+            placeholder: 'Buscar conta ou código...',
+            favorites: isCredit ? FAVORITE_ENTRADAS : FAVORITE_SAIDAS,
+            groups: getPlanoContasGroupsForCb(isCredit),
+            onChange: selectedPlano => {
+              const linked = getAutoLinkedClassification(selectedPlano);
+              if (linked) {
+                setComboboxValue(`p-ger-${item.id}`, linked.gerencial, false);
+              }
+            }
+          });
+
+          createNeonCombobox(`cb-p-ger-${item.id}`, {
+            id: `p-ger-${item.id}`,
+            value: effGer,
+            compact: true,
+            placeholder: 'Gerencial...',
+            favorites: FAVORITE_GERENCIAIS,
+            groups: getGerencialGroupsForCb()
+          });
+        });
       }
 
       window.confirmPendingItem = function (id) {
         const idx = state.pendingQueue.findIndex(p => p.id === id);
         if (idx === -1) return;
         const item = state.pendingQueue[idx];
-        const unit = document.getElementById(`p-unit-${id}`).value;
-        const plano = document.getElementById(`p-plano-${id}`).value;
-        const gerencial = document.getElementById(`p-ger-${id}`).value;
+        const unit = getComboboxValue(`p-unit-${id}`) || item.sugUnidade;
+        const plano = getComboboxValue(`p-plano-${id}`) || item.sugPlano;
+        const gerencial = getComboboxValue(`p-ger-${id}`) || item.sugGerencial;
+        const pgdas = item.tipo.includes('Crédito') ? PGDAS_OPTIONS[0] : 'Não se aplica';
+
+        // 🧠 Salva na memória de fornecedor para próximos lançamentos
+        saveVendorMemoryEntry(item.descricao, { unidade: unit, plano, gerencial, pgdas });
+
         const entry = {
           id: 'led-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
           fitid: item.fitid || '', data: item.data, mes_num: item.mes_num || 11, conta: item.conta,
           tipo: item.tipo, unidade: unit, plano_contas: plano, gerencial, rfb: getRfbForGerencial(gerencial),
-          pgdas: item.tipo.includes('Crédito') ? PGDAS_OPTIONS[0] : 'Não se aplica',
+          pgdas,
           competencia_tipo: item.tipo.includes('Crédito') ? 'Receita' : 'Despesa',
           valor: item.valor, acrescimo: 0, documento: item.fitid ? `OFX/BTG #${item.fitid}` : '',
           descricao: item.descricao, anotacoes: 'Conciliado via Fila',
@@ -2014,7 +2805,7 @@
         applyEntryToMonthlyDashboard(entry);
         state.pendingQueue.splice(idx, 1);
         saveState(); refreshAllViews();
-        showToast('Lançamento Conciliado!', `${entry.descricao} classificado em ${unit}.`, 'emerald');
+        showToast('Conciliado + Memorizado!', `${entry.descricao} salvo em ${unit}.`, 'emerald');
       };
 
       window.dismissPendingItem = function (id) {
@@ -2024,8 +2815,12 @@
 
       function renderCustomLedger() {
         const tbody = document.getElementById('customEntriesBody');
-        const q = (state.ledgerSearch || '').toLowerCase().trim();
-        const filtered = state.customLedger.filter(i => (state.ledgerAccountFilter === 'all' || i.conta === state.ledgerAccountFilter) && (!q || `${i.descricao} ${i.unidade} ${i.plano_contas} ${i.gerencial}`.toLowerCase().includes(q)));
+        const q = normalizeText(state.ledgerSearch || '');
+        const filtered = state.customLedger.filter(i =>
+          (state.ledgerAccountFilter === 'all' || i.conta === state.ledgerAccountFilter) &&
+          (state.ledgerUnitFilter === 'all' || i.unidade === state.ledgerUnitFilter) &&
+          (!q || normalizeText(`${i.descricao} ${i.unidade} ${i.plano_contas} ${i.gerencial} ${i.rfb}`).includes(q))
+        );
         document.getElementById('customLedgerCount').textContent = `${filtered.length} registro${filtered.length === 1 ? '' : 's'}`;
 
         if (filtered.length === 0) {
@@ -2065,7 +2860,18 @@
       }
 
       function autoClassifyTransaction(memo, amount) {
-        const isCredit = amount >= 0, txt = (memo || '').toLowerCase();
+        const memMatch = findVendorMemory(memo);
+        if (memMatch) {
+          return {
+            unidade: memMatch.unidade,
+            plano: memMatch.plano,
+            gerencial: memMatch.gerencial,
+            pgdas: memMatch.pgdas || (amount >= 0 ? PGDAS_OPTIONS[0] : 'Não se aplica'),
+            fromMemory: true
+          };
+        }
+
+        const isCredit = amount >= 0, txt = normalizeText(memo);
         if (isCredit) {
           if (txt.includes('acolher')) return { unidade: 'Lacqua V - 125', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0] };
           if (txt.includes('lr hospedagem')) return { unidade: 'Lacqua V - 237', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0] };
@@ -2073,7 +2879,6 @@
           if (txt.includes('remunera') || txt.includes('rendimento')) return { unidade: 'TODAS', plano: 'Rendimentos de Aplicações Financeiras (3.1.03.01.01)', gerencial: 'RECEITA', pgdas: 'Não se aplica' };
           return { unidade: 'TODAS', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'RECEITA', pgdas: PGDAS_OPTIONS[0] };
         }
-        // Regra Contajá: Transferência PIX de Arrendamento PJ -> CPF Lucas = Contratos a Pagar (2.1.05.01.09)
         if (txt.includes('arrendamento') || txt.includes('lucas parreira')) {
           return { unidade: 'Lacqua V - 125', plano: 'Contratos a Pagar (2.1.05.01.09)', gerencial: 'ALUGUEL', pgdas: 'Não se aplica' };
         }
@@ -2105,7 +2910,8 @@
             idx: index, fitid, data: dtPosted, mes_num: mNum >= 1 && mNum <= 11 ? mNum : 11,
             memo, amount, absValue: Math.abs(amount), isCredit: amount > 0,
             isDuplicate: existing.has(String(fitid)),
-            unidade: sug.unidade, plano: sug.plano, gerencial: sug.gerencial, pgdas: sug.pgdas
+            unidade: sug.unidade, plano: sug.plano, gerencial: sug.gerencial, pgdas: sug.pgdas,
+            fromMemory: Boolean(sug.fromMemory)
           });
         });
         return { bankId, acctId, dtStart, dtEnd, transactions };
@@ -2125,21 +2931,59 @@
 
         document.getElementById('ofxPreviewTableBody').innerHTML = parsed.transactions.map(tx => `
           <tr class="${tx.isDuplicate ? 'opacity-45 bg-amber-950/15' : 'hover:bg-white/5'}">
-            <td class="py-2.5 px-3 whitespace-nowrap">${tx.isDuplicate ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">Duplicado</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Novo</span>'}<div class="font-mono text-[10px] text-slate-400">${tx.fitid}</div></td>
+            <td class="py-2.5 px-3 whitespace-nowrap">
+              ${tx.isDuplicate ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">Duplicado</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Novo</span>'}
+              ${tx.fromMemory ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-300">🧠</span>' : ''}
+              <div class="font-mono text-[10px] text-slate-400 mt-0.5">${tx.fitid}</div>
+            </td>
             <td class="py-2.5 px-3 font-mono text-slate-300">${tx.data}</td>
             <td class="py-2.5 px-3 font-semibold text-white max-w-[220px]">${tx.memo}</td>
             <td class="py-2.5 px-3 text-right money font-bold ${tx.isCredit ? 'text-cyan-300' : 'text-pink-300'}">${tx.isCredit ? '+' : '-'}${formatBRL(tx.absValue)}</td>
-            <td class="py-2.5 px-3"><select onchange="updateOfxDraft(${tx.idx}, 'unidade', this.value)" ${tx.isDuplicate ? 'disabled' : ''} class="glass-input px-2 py-1 text-[11px]">${buildUnitOptionsHtml(tx.unidade)}</select></td>
-            <td class="py-2.5 px-3"><select onchange="updateOfxDraft(${tx.idx}, 'plano', this.value)" ${tx.isDuplicate ? 'disabled' : ''} class="glass-input px-2 py-1 text-[11px] max-w-[200px]">${buildPlanoContasOptionsHtml(tx.isCredit, tx.plano)}</select></td>
-            <td class="py-2.5 px-3"><select onchange="updateOfxDraft(${tx.idx}, 'gerencial', this.value)" ${tx.isDuplicate ? 'disabled' : ''} class="glass-input px-2 py-1 text-[11px] max-w-[170px]">${buildGerencialOptionsHtml(tx.gerencial)}</select></td>
+            <td class="py-2.5 px-3"><div id="cb-ofx-unit-${tx.idx}"></div></td>
+            <td class="py-2.5 px-3"><div id="cb-ofx-plano-${tx.idx}"></div></td>
+            <td class="py-2.5 px-3"><div id="cb-ofx-ger-${tx.idx}"></div></td>
           </tr>`).join('');
-      }
 
-      window.updateOfxDraft = function (idx, field, val) {
-        if (!currentOfxParsed) return;
-        const tx = currentOfxParsed.transactions.find(t => t.idx === idx);
-        if (tx) tx[field] = val;
-      };
+        parsed.transactions.forEach(tx => {
+          createNeonCombobox(`cb-ofx-unit-${tx.idx}`, {
+            id: `ofx-unit-${tx.idx}`,
+            value: tx.unidade,
+            compact: true,
+            disabled: tx.isDuplicate,
+            favorites: FAVORITE_UNITS,
+            groups: getUnitGroupsCompactForCb(),
+            onChange: val => { tx.unidade = val; }
+          });
+
+          createNeonCombobox(`cb-ofx-plano-${tx.idx}`, {
+            id: `ofx-plano-${tx.idx}`,
+            value: tx.plano,
+            compact: true,
+            disabled: tx.isDuplicate,
+            favorites: tx.isCredit ? FAVORITE_ENTRADAS : FAVORITE_SAIDAS,
+            groups: getPlanoContasGroupsForCb(tx.isCredit),
+            onChange: val => {
+              tx.plano = val;
+              const linked = getAutoLinkedClassification(val);
+              if (linked) {
+                tx.gerencial = linked.gerencial;
+                tx.pgdas = linked.pgdas;
+                setComboboxValue(`ofx-ger-${tx.idx}`, linked.gerencial, false);
+              }
+            }
+          });
+
+          createNeonCombobox(`cb-ofx-ger-${tx.idx}`, {
+            id: `ofx-ger-${tx.idx}`,
+            value: tx.gerencial,
+            compact: true,
+            disabled: tx.isDuplicate,
+            favorites: FAVORITE_GERENCIAIS,
+            groups: getGerencialGroupsForCb(),
+            onChange: val => { tx.gerencial = val; }
+          });
+        });
+      }
 
       window.importOfxTransactions = function (mode) {
         if (!currentOfxParsed) return;
@@ -2153,6 +2997,7 @@
               descricao: tx.memo, valor: tx.absValue, sugUnidade: tx.unidade, sugPlano: tx.plano, sugGerencial: tx.gerencial, sugPgdas: tx.pgdas
             });
           } else {
+            saveVendorMemoryEntry(tx.memo, { unidade: tx.unidade, plano: tx.plano, gerencial: tx.gerencial, pgdas: tx.pgdas });
             const entry = {
               id: 'ofx-d-' + Date.now() + '-' + tx.idx, fitid: tx.fitid, data: tx.data, mes_num: tx.mes_num,
               conta: 'LUMINE PJ (BTG)', tipo: tx.isCredit ? 'Crédito (Entrada)' : 'Débito (Saída)',
@@ -2233,20 +3078,20 @@
 
       /* ---------------- ABA 4: PLANO DE CONTAS ---------------- */
       function renderCatalogTab() {
-        const filter = state.catalogFilter, q = (state.catalogSearch || '').toLowerCase().trim();
+        const filter = state.catalogFilter, q = normalizeText(state.catalogSearch || '');
         document.getElementById('catalogCountBadge').textContent = String(
           state.planoEntradas.reduce((s, g) => s + g.contas.length, 0) + state.planoSaidas.reduce((s, g) => s + g.contas.length, 0) + state.gerencialRfb.length
         );
         let html = '';
         if (filter === 'all' || filter === 'rfb') {
-          const rows = state.gerencialRfb.filter(g => !q || g.gerencial.toLowerCase().includes(q) || g.rfb.toLowerCase().includes(q));
+          const rows = state.gerencialRfb.filter(g => !q || normalizeText(g.gerencial).includes(q) || normalizeText(g.rfb).includes(q));
           html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-white">Matriz Classificações Gerenciais × RFB (${rows.length})</h3><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead><tr class="border-b border-white/10 text-slate-400 uppercase"><th class="py-2 px-3">Gerencial</th><th class="py-2 px-3">Enquadramento RFB</th></tr></thead><tbody class="divide-y divide-white/5">${rows.map(g => `<tr><td class="py-2 px-3 font-bold text-white">${g.gerencial}</td><td class="py-2 px-3"><span class="px-2 py-0.5 rounded border text-[11px] font-bold ${getRfbBadgeStyle(g.rfb)}">${g.rfb}</span></td></tr>`).join('')}</tbody></table></div></div>`;
         }
         if (filter === 'all' || filter === 'entradas') {
-          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-cyan-300">Plano de Contas — Entradas (10 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoEntradas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-cyan-400/20"><div class="text-xs font-extrabold text-cyan-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || c.toLowerCase().includes(q)).map(c => `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-cyan-300">Plano de Contas — Entradas (10 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoEntradas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-cyan-400/20"><div class="text-xs font-extrabold text-cyan-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || normalizeText(c).includes(q)).map(c => `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
         }
         if (filter === 'all' || filter === 'saidas') {
-          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-pink-300">Plano de Contas — Saídas (9 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoSaidas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-pink-400/20"><div class="text-xs font-extrabold text-pink-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || c.toLowerCase().includes(q)).map(c => c.includes('2.1.05.01.09') ? `<li class="text-amber-300 font-bold bg-amber-500/10 border border-amber-400/30 px-2 py-1 rounded-lg">${c} <span class="block font-sans text-[10px] font-normal text-amber-200/90">PIX Arrendamento PJ → CPF Lucas (Contajá)</span></li>` : `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-pink-300">Plano de Contas — Saídas (9 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoSaidas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-pink-400/20"><div class="text-xs font-extrabold text-pink-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || normalizeText(c).includes(q)).map(c => c.includes('2.1.05.01.09') ? `<li class="text-amber-300 font-bold bg-amber-500/10 border border-amber-400/30 px-2 py-1 rounded-lg">${c} <span class="block font-sans text-[10px] font-normal text-amber-200/90">PIX Arrendamento PJ → CPF Lucas (Contajá)</span></li>` : `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
         }
         if (filter === 'all' || filter === 'pgdas') {
           html += `<div class="liquid-glass p-5 space-y-2"><h3 class="text-base font-bold text-violet-300">Atividades PGDAS-D (Simples Nacional Anexo III)</h3>${PGDAS_OPTIONS.map((p, i) => `<div class="p-3 rounded-xl bg-slate-950/65 border border-white/10 text-xs text-slate-200"><strong>#${i + 1}:</strong> ${p}</div>`).join('')}</div>`;
@@ -2284,6 +3129,7 @@
       }
 
       window.switchTab = function (tabId) {
+        closeActiveCombobox(true);
         state.activeTab = tabId;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('hidden', p.id !== tabId));
@@ -2389,29 +3235,51 @@
           showToast('Equalização Aplicada!', `Ajuste gravado em ${MONTH_NAMES[mNum]}/2026.`, 'violet');
         });
 
-        document.getElementById('entryType').addEventListener('change', syncFormClassificationDropdowns);
-        document.getElementById('entryPlanoContas').addEventListener('change', checkContajaRuleBanner);
-        document.getElementById('entryGerencial').addEventListener('change', updateLiveRfbBadge);
+        // 🧠 Memória de Fornecedor no Formulário Manual ao digitar a descrição
+        const descInput = document.getElementById('entryDescription');
+        descInput.addEventListener('blur', () => {
+          const mem = findVendorMemory(descInput.value);
+          const hint = document.getElementById('vendorMemoryHint');
+          if (mem) {
+            setComboboxValue('entryUnit', mem.unidade, false);
+            setComboboxValue('entryPlanoContas', mem.plano, false);
+            setComboboxValue('entryGerencial', mem.gerencial, false);
+            if (mem.pgdas) setComboboxValue('entryPgdas', mem.pgdas, false);
+            updateLiveRfbBadge(true);
+            checkContajaRuleBanner();
+            hint.classList.remove('hidden');
+            setTimeout(() => hint.classList.add('hidden'), 3500);
+          }
+        });
 
         document.getElementById('manualEntryForm').addEventListener('submit', e => {
           e.preventDefault();
           const valor = parseFloat(document.getElementById('entryAmount').value || '0');
           if (valor <= 0) return;
-          const gerencial = document.getElementById('entryGerencial').value;
+          const gerencial = getComboboxValue('entryGerencial');
+          const unidade = getComboboxValue('entryUnit');
+          const plano_contas = getComboboxValue('entryPlanoContas');
+          const pgdas = getComboboxValue('entryPgdas');
+          const descricao = document.getElementById('entryDescription').value.trim();
+
+          saveVendorMemoryEntry(descricao, { unidade, plano: plano_contas, gerencial, pgdas });
+
           const entry = {
             id: 'man-' + Date.now(), fitid: '',
             data: document.getElementById('entryDate').value,
-            mes_num: Number(document.getElementById('entryMonth').value),
-            conta: document.getElementById('entryAccount').value,
-            tipo: document.getElementById('entryType').value,
-            unidade: document.getElementById('entryUnit').value,
-            plano_contas: document.getElementById('entryPlanoContas').value,
-            gerencial, rfb: getRfbForGerencial(gerencial),
-            pgdas: document.getElementById('entryPgdas').value,
-            competencia_tipo: document.getElementById('entryCompetenciaTipo').value,
-            valor, acrescimo: parseFloat(document.getElementById('entryAcrescimo').value || '0'),
+            mes_num: Number(getComboboxValue('entryMonth') || 11),
+            conta: getComboboxValue('entryAccount'),
+            tipo: getComboboxValue('entryType'),
+            unidade,
+            plano_contas,
+            gerencial,
+            rfb: getRfbForGerencial(gerencial),
+            pgdas,
+            competencia_tipo: getComboboxValue('entryCompetenciaTipo'),
+            valor,
+            acrescimo: parseFloat(document.getElementById('entryAcrescimo').value || '0'),
             documento: document.getElementById('entryDocumento').value.trim(),
-            descricao: document.getElementById('entryDescription').value.trim(),
+            descricao,
             anotacoes: document.getElementById('entryNotes').value.trim()
           };
           state.customLedger.unshift(entry);
@@ -2423,7 +3291,6 @@
         });
 
         document.getElementById('ledgerSearchInput').addEventListener('input', e => { state.ledgerSearch = e.target.value; renderCustomLedger(); });
-        document.getElementById('ledgerAccountFilter').addEventListener('change', e => { state.ledgerAccountFilter = e.target.value; renderCustomLedger(); });
 
         const dropzone = document.getElementById('bankDropzone');
         const fileInput = document.getElementById('spreadsheetFileInput');
@@ -2439,8 +3306,17 @@
               currentWorkbook = XLSX.read(ev.target.result, { type: 'array' });
               document.getElementById('sheetPreviewBox').classList.remove('hidden');
               document.getElementById('sheetFileName').textContent = file.name;
-              const sel = document.getElementById('sheetTabSelector');
-              sel.innerHTML = currentWorkbook.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+              createNeonCombobox('cb-sheetTabSelector', {
+                id: 'sheetTabSelector',
+                value: currentWorkbook.SheetNames[0],
+                compact: true,
+                placeholder: 'Escolher aba...',
+                groups: [{
+                  label: 'Abas da Planilha',
+                  items: currentWorkbook.SheetNames.map(n => ({ value: n, label: n }))
+                }],
+                onChange: name => renderSheetTab(name)
+              });
               renderSheetTab(currentWorkbook.SheetNames[0]);
             };
             reader.readAsArrayBuffer(file);
@@ -2451,7 +3327,6 @@
           document.getElementById('sheetRowCount').textContent = `${rows.length} linhas`;
           document.getElementById('sheetPreviewTable').innerHTML = rows.slice(0, 25).map((r, i) => `<tr class="${i === 0 ? 'bg-slate-900 font-bold text-cyan-300' : 'border-t border-white/5'}">${r.map(c => `<td class="py-1.5 px-2.5">${c ?? ''}</td>`).join('')}</tr>`).join('');
         }
-        document.getElementById('sheetTabSelector').addEventListener('change', e => renderSheetTab(e.target.value));
         fileInput.addEventListener('change', e => processUploadedFile(e.target.files[0]));
         dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
         dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
@@ -2498,7 +3373,7 @@
       /* ---------------- INICIALIZAÇÃO ---------------- */
       function init() {
         loadState();
-        syncFormClassificationDropdowns();
+        initFormComboboxes();
         updateCatalogGroupDropdown();
         setupChartInteractivity();
         setupEvents();
