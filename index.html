@@ -215,7 +215,7 @@
         <p class="text-xs text-slate-400">Acesso Restrito • Supabase Auth + PostgreSQL RLS</p>
       </div>
 
-      <!-- Configuração de Conexão Supabase (URL + Anon Key) -->
+      <!-- Configuração de Conexão Supabase (Project URL + Publishable Key) -->
       <div id="supabaseConfigBox" class="p-3.5 rounded-xl bg-slate-950/80 border border-cyan-400/35 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-cyan-300">🔌 Conexão com Seu Banco Supabase</span>
@@ -224,12 +224,12 @@
 
         <div id="supabaseConfigFields" class="space-y-2.5">
           <div>
-            <label for="sbUrlInput" class="block text-[11px] text-slate-400 mb-1">Project URL (Supabase → Settings → API)</label>
-            <input type="url" id="sbUrlInput" placeholder="https://seu-projeto.supabase.co" class="glass-input w-full px-3 py-2 text-xs font-mono" />
+            <label for="sbUrlInput" class="block text-[11px] text-slate-400 mb-1">Project URL (sem /rest/v1/ no final)</label>
+            <input type="url" id="sbUrlInput" placeholder="https://txirpvctwqkfbwgjwkye.supabase.co" class="glass-input w-full px-3 py-2 text-xs font-mono" />
           </div>
           <div>
-            <label for="sbAnonKeyInput" class="block text-[11px] text-slate-400 mb-1">Anon Public Key (começa com eyJ...)</label>
-            <input type="password" id="sbAnonKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." class="glass-input w-full px-3 py-2 text-xs font-mono" />
+            <label for="sbAnonKeyInput" class="block text-[11px] text-slate-400 mb-1">Publishable Key (sb_publishable_... ou anon eyJ...)</label>
+            <input type="password" id="sbAnonKeyInput" placeholder="sb_publishable_..." class="glass-input w-full px-3 py-2 text-xs font-mono" />
           </div>
           <button type="button" id="saveSupabaseConfigBtn" class="btn-neon-violet w-full py-2 px-3 rounded-xl text-xs font-bold">
             💾 Conectar ao Supabase
@@ -257,7 +257,7 @@
           </div>
         </div>
 
-        <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-400/40 text-xs text-rose-300 font-medium">
+        <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-400/40 text-xs text-rose-300 font-medium leading-relaxed">
           Falha na autenticação. Verifique seu e-mail, senha e conexão Supabase.
         </div>
 
@@ -1112,7 +1112,6 @@
         'OUTRAS DEPESAS', 'IMPOSTOS FEDERAIS', 'RECEITA'
       ];
 
-      // Estado 100% vazio na inicialização — carregado exclusivamente do Supabase após login!
       let state = {
         activeTab: 'tab-overview',
         monthFilter: 'all',
@@ -1140,13 +1139,24 @@
       /* ========================================================================
          CONEXÃO E AUTENTICAÇÃO SUPABASE
          ======================================================================== */
+      function cleanSupabaseUrl(rawUrl) {
+        return String(rawUrl || '')
+          .trim()
+          .replace(/\/rest\/v1\/?$/i, '')
+          .replace(/\/auth\/v1\/?$/i, '')
+          .replace(/\/+$/, '');
+      }
+
       function getSavedSupabaseConfig() {
         if (DEFAULT_SUPABASE_URL && DEFAULT_SUPABASE_ANON_KEY) {
-          return { url: DEFAULT_SUPABASE_URL.trim(), anonKey: DEFAULT_SUPABASE_ANON_KEY.trim() };
+          return { url: cleanSupabaseUrl(DEFAULT_SUPABASE_URL), anonKey: DEFAULT_SUPABASE_ANON_KEY.trim() };
         }
         try {
           const raw = localStorage.getItem(SUPABASE_CFG_STORAGE_KEY);
-          if (raw) return JSON.parse(raw);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return { url: cleanSupabaseUrl(parsed.url), anonKey: String(parsed.anonKey || '').trim() };
+          }
         } catch (e) {}
         return { url: '', anonKey: '' };
       }
@@ -1158,6 +1168,7 @@
         const summaryBox = document.getElementById('supabaseConnectedSummary');
 
         if (cfg.url && cfg.anonKey && cfg.url.startsWith('http')) {
+          localStorage.setItem(SUPABASE_CFG_STORAGE_KEY, JSON.stringify(cfg));
           supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
           document.getElementById('sbUrlInput').value = cfg.url;
           document.getElementById('sbAnonKeyInput').value = cfg.anonKey;
@@ -1211,7 +1222,6 @@
           nota: u.nota || ''
         }));
 
-        // Agrupar Plano de Contas em Entradas e Saídas
         const entMap = new Map();
         const saiMap = new Map();
         (resPlano.data || []).forEach(p => {
@@ -1334,7 +1344,6 @@
           await supabaseClient.auth.signOut();
         }
         currentUser = null;
-        // Limpa a memória RAM da tela ao sair
         state.units = [];
         state.monthlyRecords = [];
         state.closings = {};
@@ -1641,7 +1650,6 @@
          RECÁLCULO FINANCEIRO NA NUVEM (APLICAR & ESTORNAR IMPACTOS)
          ======================================================================== */
       async function syncEntryFinancialImpactToSupabase(entry, multiplier) {
-        // multiplier: +1 para aplicar lançamento, -1 para estornar (ao editar ou apagar)
         if (entry.jaContabilizadoNoFechamento) return;
 
         const mNum = Number(entry.mes_num);
@@ -1650,7 +1658,6 @@
         const p = normalizeText(entry.plano_contas);
         const g = normalizeText(entry.gerencial);
 
-        // Se for imposto DAS / DARF
         if (!isCredit && (p.includes('simples nacional (das)') || p.includes('darf folha') || p.includes('impostos e taxas federais'))) {
           if (!state.closings[mNum]) state.closings[mNum] = { imposto: 0, ajuste: 0 };
           state.closings[mNum].imposto = Math.max(0, Number((Number(state.closings[mNum].imposto || 0) + delta).toFixed(2)));
@@ -2619,10 +2626,10 @@
          ======================================================================== */
       function setupEvents() {
         document.getElementById('saveSupabaseConfigBtn').addEventListener('click', () => {
-          const url = document.getElementById('sbUrlInput').value.trim();
+          const url = cleanSupabaseUrl(document.getElementById('sbUrlInput').value);
           const anonKey = document.getElementById('sbAnonKeyInput').value.trim();
           if (!url.startsWith('https://') || anonKey.length < 20) {
-            showToast('Chaves Inválidas', 'Verifique a Project URL e a Anon Key do Supabase.', 'rose');
+            showToast('Chaves Inválidas', 'Verifique a Project URL e a Publishable Key do Supabase.', 'rose');
             return;
           }
           localStorage.setItem(SUPABASE_CFG_STORAGE_KEY, JSON.stringify({ url, anonKey }));
@@ -2643,23 +2650,41 @@
         document.getElementById('loginForm').addEventListener('submit', async e => {
           e.preventDefault();
           if (!supabaseClient) {
-            showToast('Conecte ao Supabase', 'Cole primeiro a URL e a Anon Key do projeto acima.', 'rose');
+            showToast('Conecte ao Supabase', 'Cole primeiro a URL e a Publishable Key do projeto acima.', 'rose');
             return;
           }
           const btn = document.getElementById('loginSubmitBtn');
+          const errBox = document.getElementById('loginErrorMsg');
           btn.disabled = true; btn.textContent = '⏳ Autenticando...';
-          const email = document.getElementById('loginEmail').value.trim();
+          errBox.classList.add('hidden');
+
+          const email = document.getElementById('loginEmail').value.trim().toLowerCase();
           const password = document.getElementById('loginPassword').value;
 
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          btn.disabled = false; btn.textContent = '🔓 Entrar no Sistema na Nuvem';
+          try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            btn.disabled = false; btn.textContent = '🔓 Entrar no Sistema na Nuvem';
 
-          if (error || !data.user) {
-            document.getElementById('loginErrorMsg').classList.remove('hidden');
-            return;
+            if (error || !data.user) {
+              const rawMsg = error ? error.message : 'Erro desconhecido';
+              let friendly = `Erro Supabase: ${rawMsg}`;
+              if (rawMsg.includes('Invalid login credentials')) {
+                friendly = 'E-mail ou senha incorretos no Supabase — confira em Authentication → Users se o usuário foi criado e se a senha está igual.';
+              } else if (rawMsg.includes('Email not confirmed')) {
+                friendly = 'E-mail ainda não confirmado. No Supabase → Authentication → Users, clique no usuário e marque como confirmado.';
+              } else if (rawMsg.includes('Failed to fetch')) {
+                friendly = 'Não foi possível alcançar o servidor Supabase. Confira a Project URL e a Publishable Key.';
+              }
+              errBox.textContent = friendly;
+              errBox.classList.remove('hidden');
+              return;
+            }
+            await enterAuthenticatedShell(data.user);
+          } catch (netErr) {
+            btn.disabled = false; btn.textContent = '🔓 Entrar no Sistema na Nuvem';
+            errBox.textContent = `Falha de conexão: ${netErr.message || 'Verifique a URL do Supabase'}`;
+            errBox.classList.remove('hidden');
           }
-          document.getElementById('loginErrorMsg').classList.add('hidden');
-          await enterAuthenticatedShell(data.user);
         });
 
         document.getElementById('changePasswordForm').addEventListener('submit', async e => {
@@ -2705,7 +2730,6 @@
           showToast('Gravado na Nuvem!', `Equalização de ${MONTH_NAMES[mNum]}/2026 salva no Supabase.`, 'violet');
         });
 
-        // Novo Lançamento Manual -> Supabase
         document.getElementById('manualEntryForm').addEventListener('submit', async e => {
           e.preventDefault();
           if (!supabaseClient) return;
@@ -2748,7 +2772,6 @@
           showToast('Salvo no Supabase!', `${descricao} gravado com sucesso.`, 'cyan');
         });
 
-        // Salvar Edição (✏️) -> Estorna antigo + Aplica novo no Supabase
         document.getElementById('editEntryForm').addEventListener('submit', async e => {
           e.preventDefault();
           if (!supabaseClient) return;
@@ -2779,10 +2802,8 @@
           const { error } = await supabaseClient.from('lancamentos').update(updatedFields).eq('id', id);
           if (error) { showToast('Erro ao Editar', error.message, 'rose'); return; }
 
-          // 1. Estorna o impacto financeiro anterior
           await syncEntryFinancialImpactToSupabase(oldEntry, -1);
 
-          // 2. Atualiza objeto local e aplica novo impacto financeiro
           const updatedLocal = {
             ...oldEntry,
             ...updatedFields,
