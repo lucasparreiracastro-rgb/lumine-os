@@ -201,7 +201,7 @@
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
   <!-- ========================================================================
-       TELA DE LOGIN REAL (SUPABASE AUTH — ZERO DADOS NO CÓDIGO PÚBLICO)
+       TELA DE LOGIN REAL + 2FA (SUPABASE AUTH — ZERO DADOS NO CÓDIGO PÚBLICO)
        ======================================================================== -->
   <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#050811]/94 backdrop-blur-2xl overflow-y-auto">
     <div class="liquid-glass glow-cyan max-w-md w-full p-6 sm:p-8 space-y-5 my-auto">
@@ -212,7 +212,7 @@
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
           Lumine <span class="text-cyan-400">&amp;</span> Caldas <span class="text-violet-400">OS</span>
         </h1>
-        <p class="text-xs text-slate-400">Acesso Restrito • Supabase Auth + PostgreSQL RLS</p>
+        <p class="text-xs text-slate-400">Acesso Restrito • Supabase Auth + MFA 2FA + RLS</p>
       </div>
 
       <!-- Caixa de Configuração Inicial (Fica OCULTA automaticamente assim que conectada) -->
@@ -241,7 +241,7 @@
       <form id="loginForm" class="space-y-4">
         <div>
           <label for="loginEmail" class="block text-xs font-semibold text-slate-300 mb-1.5">E-mail Cadastrado no Supabase</label>
-          <input type="email" id="loginEmail" required autocomplete="username" placeholder="lucas@luminecaldas.com.br" class="glass-input w-full px-3.5 py-2.5 text-sm" />
+          <input type="email" id="loginEmail" required autocomplete="username" placeholder="seu-email@dominio.com" class="glass-input w-full px-3.5 py-2.5 text-sm" />
         </div>
 
         <div>
@@ -261,9 +261,34 @@
         </button>
 
         <div class="pt-1 flex items-center justify-between text-[11px] text-slate-400">
-          <span>🔒 Banco Nuvem Criptografado • RLS Ativo</span>
+          <span>🔒 Banco Nuvem Criptografado • RLS Restrito</span>
           <button type="button" id="editSupabaseConfigBtn" class="text-slate-500 hover:text-cyan-300 transition-colors" title="Configurar chaves do servidor">⚙️</button>
         </div>
+      </form>
+
+      <!-- Etapa 2: Verificação em Duas Etapas (2FA TOTP) -->
+      <form id="mfaVerifyForm" class="hidden space-y-4">
+        <div class="p-3.5 rounded-xl bg-violet-950/35 border border-violet-400/35 text-xs text-slate-200 space-y-1">
+          <div class="font-bold text-violet-300">🔐 Verificação em Duas Etapas (2FA Ativo)</div>
+          <p class="text-slate-300">Abra seu aplicativo autenticador (Google Authenticator / Authy) e digite o código de 6 dígitos.</p>
+        </div>
+
+        <div>
+          <label for="mfaLoginCodeInput" class="block text-xs font-semibold text-slate-300 mb-1.5">Código de 6 dígitos *</label>
+          <input type="text" id="mfaLoginCodeInput" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="000000" class="glass-input money w-full px-4 py-3 text-center text-lg tracking-[0.35em] font-bold" />
+        </div>
+
+        <div id="mfaErrorMsg" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-400/40 text-xs text-rose-300 font-medium">
+          Código inválido ou expirado. Tente novamente.
+        </div>
+
+        <button type="submit" id="mfaVerifySubmitBtn" class="btn-neon-cyan w-full py-3 px-4 rounded-xl text-sm font-extrabold">
+          ✓ Validar Código 2FA &amp; Acessar
+        </button>
+
+        <button type="button" onclick="logoutSupabase()" class="w-full py-2 text-xs text-slate-400 hover:text-white">
+          ← Voltar ao login
+        </button>
       </form>
     </div>
   </div>
@@ -356,18 +381,19 @@
   </div>
 
   <!-- ========================================================================
-       MODAL DE SEGURANÇA, SENHA & BACKUP EXCEL
+       MODAL DE SEGURANÇA, SENHA, 2FA & BACKUP EXCEL
        ======================================================================== -->
   <div id="securityModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
-    <div class="liquid-glass glow-violet max-w-xl w-full p-6 space-y-5 my-auto">
+    <div class="liquid-glass glow-violet max-w-xl w-full p-6 space-y-5 my-auto max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-white/10 pb-3.5">
         <div>
-          <h3 class="text-base sm:text-lg font-bold text-white">🔐 Conta Supabase &amp; Backup Excel</h3>
-          <p class="text-xs text-slate-400">Gerencie sua senha no servidor e baixe cópias de segurança em planilha</p>
+          <h3 class="text-base sm:text-lg font-bold text-white">🔐 Segurança (2FA), Senha &amp; Backup Excel</h3>
+          <p class="text-xs text-slate-400">Proteção em duas etapas, senha no servidor e exportação em planilha</p>
         </div>
         <button type="button" onclick="closeSecurityModal()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10">✕</button>
       </div>
 
+      <!-- Backup Excel -->
       <div class="p-4 rounded-xl bg-emerald-950/25 border border-emerald-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h4 class="text-sm font-bold text-emerald-300">Cópia de Segurança Completa (.XLSX)</h4>
@@ -378,6 +404,34 @@
         </button>
       </div>
 
+      <!-- Verificação em Duas Etapas (2FA TOTP) -->
+      <div class="p-4 rounded-xl bg-violet-950/25 border border-violet-400/35 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h4 class="text-sm font-bold text-violet-200">Verificação em Duas Etapas (2FA / Autenticador)</h4>
+            <p id="mfaStatusText" class="text-xs text-slate-300 mt-0.5">Verificando status do segundo fator...</p>
+          </div>
+          <div id="mfaActionButtons"></div>
+        </div>
+
+        <!-- Área de Pareamento QR Code -->
+        <div id="mfaEnrollBox" class="hidden pt-3 border-t border-white/10 space-y-3">
+          <p class="text-xs text-slate-300">1. Escaneie o QR Code abaixo no <strong>Google Authenticator</strong> ou <strong>Authy</strong> (ou cole a chave secreta):</p>
+          <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-950/80 p-3.5 rounded-xl border border-white/10">
+            <img id="mfaQrImg" alt="QR Code 2FA" class="w-36 h-36 rounded-lg bg-white p-1.5 shrink-0" />
+            <div class="space-y-2 w-full">
+              <div class="text-[11px] text-slate-400">Chave Secreta (caso digite manualmente):</div>
+              <div id="mfaSecretText" class="font-mono text-xs text-cyan-300 bg-black/50 px-2.5 py-1.5 rounded border border-white/10 break-all select-all">-</div>
+              <form id="mfaConfirmEnrollForm" class="flex items-center gap-2 pt-1">
+                <input type="text" id="mfaEnrollCodeInput" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="Código 6 dígitos" class="glass-input money w-36 px-3 py-2 text-xs text-center font-bold" />
+                <button type="submit" class="btn-neon-cyan px-3.5 py-2 rounded-xl text-xs font-extrabold">✓ Ativar 2FA</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alterar Senha -->
       <form id="changePasswordForm" class="p-4 rounded-xl bg-slate-950/65 border border-white/10 space-y-3">
         <h4 class="text-sm font-bold text-white">Alterar Senha no Supabase (<span id="secCurrentUserEmail" class="font-mono text-cyan-300">-</span>)</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -398,7 +452,7 @@
   </div>
 
   <!-- ========================================================================
-       SHELL AUTENTICADO (SÓ APARECE APÓS LOGIN NO SUPABASE)
+       SHELL AUTENTICADO (SÓ APARECE APÓS LOGIN + 2FA NO SUPABASE)
        ======================================================================== -->
   <div id="appShell" class="hidden">
 
@@ -443,7 +497,7 @@
             </button>
 
             <button type="button" onclick="openSecurityModal()" class="btn-neon-violet px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">
-              🔐 Senha &amp; Conta
+              🔐 Senha &amp; 2FA
             </button>
 
             <button type="button" onclick="logoutSupabase()" class="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/15 border border-rose-400/35 text-rose-300 hover:bg-rose-500/25 whitespace-nowrap">
@@ -465,7 +519,7 @@
           </button>
           <button data-tab="tab-sql" class="tab-btn flex items-center gap-1.5 px-3 py-2 text-xs font-semibold whitespace-nowrap">
             <span>5. Fiscal Simples Nacional</span>
-            <span class="px-1.5 py-0.5 text-[10px] font-mono rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">7,7226%</span>
+            <span id="navTaxRateBadge" class="px-1.5 py-0.5 text-[10px] font-mono rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">Anexo III</span>
           </button>
         </nav>
       </div>
@@ -499,7 +553,7 @@
             <div class="inline-flex flex-wrap p-1 rounded-xl bg-slate-950/75 border border-white/10">
               <button type="button" data-scope="all" class="scope-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">Consolidado Geral PJ+PF</button>
               <button type="button" data-scope="PJ" class="scope-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Somente Lumine PJ</button>
-              <button type="button" data-scope="PF" class="scope-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Somente Lucas PF</button>
+              <button type="button" data-scope="PF" class="scope-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Somente Carteira PF</button>
             </div>
           </div>
         </div>
@@ -507,7 +561,7 @@
         <div class="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
           <div class="text-left md:text-right">
             <div class="text-[11px] text-slate-400">Banco de Dados</div>
-            <div class="text-xs font-semibold text-emerald-300">PostgreSQL Nuvem • RLS Protegido</div>
+            <div class="text-xs font-semibold text-emerald-300">PostgreSQL Nuvem • RLS + 2FA</div>
           </div>
           <button type="button" onclick="switchTab('tab-entries')" class="btn-neon-cyan px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap">
             + Classificar / Lançar
@@ -538,21 +592,21 @@
             <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Financiamentos PF</span>
             <div class="mt-3">
               <div id="kpiFinanciamentos" class="money text-xl sm:text-2xl font-bold text-sky-300">R$ 0,00</div>
-              <p class="text-[11px] text-slate-400 mt-1">Piazza - 416 + Spazzio - 713</p>
+              <p class="text-[11px] text-slate-400 mt-1">Unidades financiadas PF</p>
             </div>
           </div>
 
           <div class="liquid-glass liquid-glass-hover glow-violet p-5 flex flex-col justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Impostos (DAS+DARF) + Irmão</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Impostos (DAS+DARF) + Sócio</span>
             <div class="mt-3">
               <div id="kpiImpostosAjuste" class="money text-xl sm:text-2xl font-bold text-violet-300">R$ 0,00</div>
-              <p id="kpiImpostosSub" class="text-[11px] text-slate-400 mt-1">DAS+DARF: R$ 0,00 | Irmão: R$ 0,00</p>
+              <p id="kpiImpostosSub" class="text-[11px] text-slate-400 mt-1">DAS+DARF: R$ 0,00 | Sócio: R$ 0,00</p>
             </div>
           </div>
 
           <div class="liquid-glass liquid-glass-hover glow-cyan p-5 flex flex-col justify-between bg-gradient-to-br from-cyan-950/40 via-slate-900/60 to-violet-950/35">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-cyan-200">Lucro Líquido Lucas</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-cyan-200">Lucro Líquido Final</span>
               <span id="kpiMargemBadge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">0,0%</span>
             </div>
             <div class="mt-3">
@@ -587,25 +641,25 @@
                 <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-400/35">Acerto Societário</span>
                 <span id="brotherMonthTag" class="text-xs font-mono text-slate-400">Acumulado</span>
               </div>
-              <h2 class="text-base font-bold text-white">Divisão Igualitária com Irmão (Vitor)</h2>
-              <p class="text-xs text-slate-400">Calcula e grava na nuvem o ajuste <code class="text-cyan-300">(Vitor - Lucas) / 2</code>.</p>
+              <h2 class="text-base font-bold text-white">Divisão Igualitária com Sócio / Coproprietário</h2>
+              <p class="text-xs text-slate-400">Calcula e grava na nuvem o ajuste <code class="text-cyan-300">(Sócio - Titular) / 2</code>.</p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-slate-950/65 border border-white/10 space-y-1.5 text-xs">
-              <div class="flex justify-between"><span class="text-slate-400">Resultado Lucas (Pré-Ajuste):</span><span id="lucasBeforeBrother" class="money font-semibold text-slate-200">R$ 0,00</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Resultado Titular (Pré-Ajuste):</span><span id="lucasBeforeBrother" class="money font-semibold text-slate-200">R$ 0,00</span></div>
               <div class="flex justify-between"><span class="text-slate-400">Ajuste Gravado no Período:</span><span id="currentBrotherAdjustment" class="money font-bold text-cyan-300">R$ 0,00</span></div>
               <div id="brotherDirectionHint" class="text-[11px] text-slate-400 pt-1 border-t border-white/5">Selecione um mês específico acima para calcular e aplicar.</div>
             </div>
 
             <div class="space-y-3">
               <div>
-                <label for="brotherNetInput" class="block text-xs font-medium text-slate-300 mb-1">Resultado Líquido do Irmão (Vitor) no mês (R$)</label>
+                <label for="brotherNetInput" class="block text-xs font-medium text-slate-300 mb-1">Resultado Líquido do Sócio no mês (R$)</label>
                 <input type="number" step="0.01" id="brotherNetInput" placeholder="Ex: 11250.00" class="glass-input money w-full px-3.5 py-2.5 text-sm" />
               </div>
 
               <div class="p-3 rounded-xl bg-violet-950/35 border border-violet-400/25 text-xs space-y-1">
-                <div class="flex justify-between"><span class="text-slate-300">Transferência / Ajuste Lucas:</span><span id="calcAdjustmentValue" class="money font-bold text-violet-300">R$ 0,00</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Valor igual p/ cada irmão:</span><span id="calcEqualTarget" class="money font-semibold text-cyan-300">R$ 0,00</span></div>
+                <div class="flex justify-between"><span class="text-slate-300">Transferência / Ajuste:</span><span id="calcAdjustmentValue" class="money font-bold text-violet-300">R$ 0,00</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Valor igual p/ cada parte:</span><span id="calcEqualTarget" class="money font-semibold text-cyan-300">R$ 0,00</span></div>
               </div>
 
               <button type="button" id="applyBrotherBtn" class="btn-neon-violet w-full py-2.5 px-4 rounded-xl text-xs font-bold">
@@ -632,8 +686,8 @@
                   <th class="py-3 px-3 text-right">Desp. Operac.</th>
                   <th class="py-3 px-3 text-right">Financ. PF</th>
                   <th class="py-3 px-3 text-right">Impostos (DAS+DARF)</th>
-                  <th class="py-3 px-3 text-right">Ajuste Irmão</th>
-                  <th class="py-3 px-3 text-right">Lucro Lucas</th>
+                  <th class="py-3 px-3 text-right">Ajuste Sócio</th>
+                  <th class="py-3 px-3 text-right">Lucro Líquido</th>
                 </tr>
               </thead>
               <tbody id="monthlySummaryBody" class="divide-y divide-white/5 text-xs sm:text-sm"></tbody>
@@ -691,17 +745,17 @@
                 </span>
               </div>
               <h2 class="text-lg font-bold text-white mt-1.5">Novo Lançamento com Classificação Completa em 4 Eixos</h2>
-              <p class="text-xs text-slate-400">Clique e comece a digitar qualquer palavra ou código contábil (ex.: <code class="text-cyan-300">2.1.05</code>, <code class="text-cyan-300">fornec</code>, <code class="text-cyan-300">125</code>).</p>
+              <p class="text-xs text-slate-400">Clique e comece a digitar qualquer palavra ou código contábil (ex.: <code class="text-cyan-300">2.1.05</code>, <code class="text-cyan-300">fornec</code>).</p>
             </div>
 
             <button type="button" onclick="applyArrendamentoPreset()" class="btn-neon-violet px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap self-start lg:self-auto">
-              ⚡ Preencher Arrendamento PJ → CPF Lucas (2.1.05.01.09)
+              ⚡ Preencher Arrendamento PJ → CPF Titular (2.1.05.01.09)
             </button>
           </div>
 
           <div id="contajaRuleBanner" class="hidden mb-4 p-3.5 rounded-xl bg-amber-950/35 border border-amber-400/40 text-xs">
             <span class="font-bold text-amber-300">📌 Regra Contajá (Código 2.1.05.01.09):</span>
-            <span class="text-slate-200"> Transferência PIX do Arrendamento da Lumine PJ para o CPF do Lucas — classificar sempre como <strong>Contratos a Pagar (2.1.05.01.09)</strong> (nunca usar Distribuição de Lucros).</span>
+            <span class="text-slate-200"> Transferência PIX do Arrendamento da Lumine PJ para o CPF do titular — classificar sempre como <strong>Contratos a Pagar (2.1.05.01.09)</strong> (nunca usar Distribuição de Lucros).</span>
           </div>
 
           <form id="manualEntryForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
@@ -775,7 +829,7 @@
                 <label for="entryDescription" class="text-xs font-semibold text-slate-300">Descrição / Histórico *</label>
                 <span id="vendorMemoryHint" class="hidden text-[10px] font-semibold text-emerald-300">🧠 Memória de fornecedor aplicada!</span>
               </div>
-              <input type="text" id="entryDescription" required placeholder="Ex: Transferência PIX do Arrendamento para o CPF do Lucas" class="glass-input w-full px-3.5 py-2 text-sm" />
+              <input type="text" id="entryDescription" required placeholder="Ex: Transferência PIX do Arrendamento" class="glass-input w-full px-3.5 py-2 text-sm" />
             </div>
 
             <div class="lg:col-span-4">
@@ -814,7 +868,7 @@
 
             <div class="flex flex-wrap items-center gap-2">
               <button type="button" onclick="downloadSampleBTGOfx()" class="btn-neon-violet px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap">
-                🧪 Baixar Arquivo .OFX de Teste (BTG)
+                🧪 Baixar Arquivo .OFX de Exemplo
               </button>
             </div>
           </div>
@@ -995,13 +1049,13 @@
         <div id="catalogSectionsContainer" class="space-y-6"></div>
       </div>
 
-      <!-- ABA 5: FISCAL SIMPLES NACIONAL -->
+      <!-- ABA 5: FISCAL SIMPLES NACIONAL (DADOS CARREGADOS DO SUPABASE) -->
       <div id="tab-sql" class="tab-panel hidden space-y-6">
         <section class="liquid-glass glow-violet p-5 sm:p-6 space-y-5">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-violet-500/20 text-violet-300 border border-violet-400/35">Apuração Tributária • Lumine PJ</span>
-              <h2 class="text-lg font-bold text-white mt-1">Simples Nacional — Anexo III (Faixa II • Alíquota Efetiva 7,7226%)</h2>
+              <h2 id="taxHeaderTitle" class="text-lg font-bold text-white mt-1">Simples Nacional — Anexo III</h2>
               <p class="text-xs text-slate-400">Rateio proporcional das guias DAS + DARF (0385) entre as unidades PJ conforme o faturamento de cada apartamento.</p>
             </div>
 
@@ -1021,23 +1075,23 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="p-4 rounded-xl bg-slate-950/65 border border-white/10">
               <div class="text-[11px] uppercase text-slate-400">RBT12 Proporcionalizada</div>
-              <div class="money text-lg font-bold text-white mt-1">R$ 269.169,21</div>
-              <div class="text-[11px] text-violet-300 mt-1">Faixa II (R$ 180k a R$ 360k)</div>
+              <div id="taxRbt12Val" class="money text-lg font-bold text-white mt-1">R$ 0,00</div>
+              <div id="taxFaixaDesc" class="text-[11px] text-violet-300 mt-1">Carregado do Supabase</div>
             </div>
             <div class="p-4 rounded-xl bg-slate-950/65 border border-white/10">
               <div class="text-[11px] uppercase text-slate-400">Alíquota Nominal</div>
-              <div class="money text-lg font-bold text-violet-300 mt-1">11,20%</div>
+              <div id="taxAliquotaNominalVal" class="money text-lg font-bold text-violet-300 mt-1">0,00%</div>
               <div class="text-[11px] text-slate-400 mt-1">Anexo III • Atividade 7.6</div>
             </div>
             <div class="p-4 rounded-xl bg-slate-950/65 border border-white/10">
               <div class="text-[11px] uppercase text-slate-400">Parcela a Deduzir</div>
-              <div class="money text-lg font-bold text-sky-300 mt-1">R$ 9.360,00</div>
-              <div class="text-[11px] text-slate-400 mt-1">Dedução legal Faixa II</div>
+              <div id="taxParcelaDeduzirVal" class="money text-lg font-bold text-sky-300 mt-1">R$ 0,00</div>
+              <div class="text-[11px] text-slate-400 mt-1">Dedução legal tabela Simples</div>
             </div>
             <div class="p-4 rounded-xl bg-gradient-to-br from-violet-950/50 to-cyan-950/40 border border-cyan-400/35">
               <div class="text-[11px] uppercase text-cyan-200">Alíquota Efetiva</div>
-              <div class="money text-xl font-extrabold text-cyan-300 mt-1">7,7226%</div>
-              <div class="text-[11px] text-slate-300 mt-1">((269.169,21 × 11,2%) - 9.360) / RBT12</div>
+              <div id="taxAliquotaEfetivaVal" class="money text-xl font-extrabold text-cyan-300 mt-1">0,0000%</div>
+              <div class="text-[11px] text-slate-300 mt-1">((RBT12 × Alíq. Nom.) - Ded.) / RBT12</div>
             </div>
           </div>
 
@@ -1065,7 +1119,7 @@
       'use strict';
 
       // ========================================================================
-      // CONFIGURAÇÃO DO SUPABASE (Preencha aqui OU salve uma vez no navegador)
+      // CONFIGURAÇÃO DO SUPABASE (ZERO DADOS SENSÍVEIS NO CÓDIGO PÚBLICO)
       // ========================================================================
       const DEFAULT_SUPABASE_URL = '';
       const DEFAULT_SUPABASE_ANON_KEY = '';
@@ -1073,6 +1127,8 @@
 
       let supabaseClient = null;
       let currentUser = null;
+      let pendingMfaFactorId = null;
+      let enrollingMfaFactorId = null;
 
       const MONTH_NAMES = {
         1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
@@ -1125,7 +1181,14 @@
         planoEntradas: [],
         planoSaidas: [],
         gerencialRfb: [],
-        vendorMemory: {}
+        vendorMemory: {},
+        fiscalConfig: {
+          faixa_descricao: 'Anexo III',
+          rbt12: 0,
+          aliquota_nominal: 0,
+          parcela_deduzir: 0,
+          aliquota_efetiva: 0
+        }
       };
 
       let currentOfxParsed = null;
@@ -1133,7 +1196,19 @@
       let chartHitBoxes = [];
 
       /* ========================================================================
-         CONEXÃO E AUTENTICAÇÃO SUPABASE
+         SANITIZAÇÃO ANTI-XSS (ESCAPA HTML EM 100% DAS INJEÇÕES DOM)
+         ======================================================================== */
+      function escapeHtml(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      /* ========================================================================
+         CONEXÃO E AUTENTICAÇÃO SUPABASE + MFA 2FA
          ======================================================================== */
       function cleanSupabaseUrl(rawUrl) {
         return String(rawUrl || '')
@@ -1167,7 +1242,6 @@
           supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
           document.getElementById('sbUrlInput').value = cfg.url;
           document.getElementById('sbAnonKeyInput').value = cfg.anonKey;
-          // Oculta automaticamente a caixa de conexão para não expor a URL na tela de login
           configBox.classList.add('hidden');
           closeBtn.classList.remove('hidden');
           return true;
@@ -1178,6 +1252,89 @@
           return false;
         }
       }
+
+      async function checkMfaAndEnterShell(user) {
+        if (!supabaseClient || !user) return;
+        try {
+          const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
+            const { data: factors } = await supabaseClient.auth.mfa.listFactors();
+            const verifiedTotp = (factors && factors.totp || []).find(f => f.status === 'verified');
+            if (verifiedTotp) {
+              pendingMfaFactorId = verifiedTotp.id;
+              document.getElementById('loginForm').classList.add('hidden');
+              document.getElementById('supabaseConfigBox').classList.add('hidden');
+              document.getElementById('mfaVerifyForm').classList.remove('hidden');
+              document.getElementById('mfaErrorMsg').classList.add('hidden');
+              document.getElementById('mfaLoginCodeInput').value = '';
+              document.getElementById('mfaLoginCodeInput').focus();
+              return;
+            }
+          }
+        } catch (e) {}
+        await enterAuthenticatedShell(user);
+      }
+
+      async function refreshMfaStatusUI() {
+        if (!supabaseClient) return;
+        const statusEl = document.getElementById('mfaStatusText');
+        const btnWrap = document.getElementById('mfaActionButtons');
+        const enrollBox = document.getElementById('mfaEnrollBox');
+        enrollBox.classList.add('hidden');
+
+        try {
+          const { data: factors, error } = await supabaseClient.auth.mfa.listFactors();
+          if (error) throw error;
+          const verified = (factors && factors.totp || []).find(f => f.status === 'verified');
+          if (verified) {
+            statusEl.innerHTML = `<span class="text-emerald-300 font-bold">✅ Ativo e Protegendo sua Conta</span> • Código de 6 dígitos exigido no login.`;
+            btnWrap.innerHTML = `<button type="button" onclick="disableTotp2FA('${escapeHtml(verified.id)}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/15 border border-rose-400/35 text-rose-300 hover:bg-rose-500/25">Desativar 2FA</button>`;
+          } else {
+            statusEl.innerHTML = `<span class="text-amber-300 font-semibold">⚠️ Desativado</span> • Ative para exigir código do celular no login.`;
+            btnWrap.innerHTML = `<button type="button" onclick="startTotp2FAEnroll()" class="btn-neon-cyan px-3.5 py-2 rounded-xl text-xs font-bold">📲 Configurar 2FA (QR Code)</button>`;
+          }
+        } catch (err) {
+          statusEl.textContent = 'Não foi possível verificar o 2FA agora.';
+          btnWrap.innerHTML = '';
+        }
+      }
+
+      window.startTotp2FAEnroll = async function () {
+        if (!supabaseClient) return;
+        try {
+          const { data: existing } = await supabaseClient.auth.mfa.listFactors();
+          const unverifiedList = (existing && existing.totp || []).filter(f => f.status !== 'verified');
+          for (const oldF of unverifiedList) {
+            await supabaseClient.auth.mfa.unenroll({ factorId: oldF.id });
+          }
+
+          const { data, error } = await supabaseClient.auth.mfa.enroll({
+            factorType: 'totp',
+            friendlyName: 'Lumine Caldas OS'
+          });
+          if (error) throw error;
+
+          enrollingMfaFactorId = data.id;
+          document.getElementById('mfaQrImg').src = data.totp.qr_code;
+          document.getElementById('mfaSecretText').textContent = data.totp.secret;
+          document.getElementById('mfaEnrollCodeInput').value = '';
+          document.getElementById('mfaEnrollBox').classList.remove('hidden');
+          document.getElementById('mfaEnrollCodeInput').focus();
+        } catch (err) {
+          showToast('Erro ao Iniciar 2FA', err.message || 'Falha ao gerar QR Code.', 'rose');
+        }
+      };
+
+      window.disableTotp2FA = async function (factorId) {
+        if (!supabaseClient || !factorId) return;
+        const { error } = await supabaseClient.auth.mfa.unenroll({ factorId });
+        if (error) {
+          showToast('Erro ao Desativar 2FA', error.message, 'rose');
+          return;
+        }
+        showToast('2FA Desativado', 'A verificação em duas etapas foi removida.', 'violet');
+        await refreshMfaStatusUI();
+      };
 
       async function loadAllDataFromSupabase() {
         if (!supabaseClient) return;
@@ -1192,7 +1349,8 @@
           resFech,
           resLanc,
           resFila,
-          resMem
+          resMem,
+          resFiscal
         ] = await Promise.all([
           supabaseClient.from('unidades').select('*').order('nome'),
           supabaseClient.from('plano_contas').select('*').order('grupo').order('nome_conta'),
@@ -1201,7 +1359,8 @@
           supabaseClient.from('fechamentos_mensais').select('*').eq('ano', 2026),
           supabaseClient.from('lancamentos').select('*').order('data_movimento', { ascending: false }).order('created_at', { ascending: false }),
           supabaseClient.from('fila_conciliacao').select('*').order('data_movimento', { ascending: true }),
-          supabaseClient.from('memoria_fornecedores').select('*')
+          supabaseClient.from('memoria_fornecedores').select('*'),
+          supabaseClient.from('configuracoes_fiscais').select('*').eq('ano', 2026).maybeSingle()
         ]);
 
         if (resUnits.error) throw resUnits.error;
@@ -1297,6 +1456,16 @@
           };
         });
 
+        if (resFiscal && resFiscal.data) {
+          state.fiscalConfig = {
+            faixa_descricao: resFiscal.data.faixa_descricao || 'Anexo III',
+            rbt12: Number(resFiscal.data.rbt12 || 0),
+            aliquota_nominal: Number(resFiscal.data.aliquota_nominal || 0),
+            parcela_deduzir: Number(resFiscal.data.parcela_deduzir || 0),
+            aliquota_efetiva: Number(resFiscal.data.aliquota_efetiva || 0)
+          };
+        }
+
         if (syncBadge) syncBadge.textContent = '☁️ Supabase Sincronizado';
       }
 
@@ -1325,7 +1494,7 @@
           updateCatalogGroupDropdown();
           refreshAllViews();
         } catch (err) {
-          showToast('Aviso ao Carregar Dados', err.message || 'Verifique se você rodou o Script SQL no Supabase.', 'rose');
+          showToast('Aviso ao Carregar Dados', err.message || 'Verifique as permissões RLS no Supabase.', 'rose');
         }
       }
 
@@ -1335,19 +1504,24 @@
           await supabaseClient.auth.signOut();
         }
         currentUser = null;
+        pendingMfaFactorId = null;
         state.units = [];
         state.monthlyRecords = [];
         state.closings = {};
         state.pendingQueue = [];
         state.customLedger = [];
+        state.vendorMemory = {};
         document.getElementById('loginPassword').value = '';
+        document.getElementById('mfaVerifyForm').classList.add('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
         document.getElementById('appShell').classList.add('hidden');
         document.getElementById('loginOverlay').classList.remove('hidden');
       };
 
-      window.openSecurityModal = function () {
+      window.openSecurityModal = async function () {
         const m = document.getElementById('securityModal');
         m.classList.remove('hidden'); m.classList.add('flex');
+        await refreshMfaStatusUI();
       };
 
       window.closeSecurityModal = function () {
@@ -1360,10 +1534,6 @@
          ======================================================================== */
       function normalizeText(str) {
         return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-      }
-
-      function escapeHtml(str) {
-        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
 
       function highlightMatch(label, rawQuery) {
@@ -1586,7 +1756,7 @@
 
       function extractVendorKey(rawDesc) {
         let s = normalizeText(rawDesc)
-          .replace(/^transferencia pix do arrendamento para o cpf do lucas.*$/, 'arrendamento cpf lucas')
+          .replace(/^transferencia pix do arrendamento.*$/, 'arrendamento cpf titular')
           .replace(/^pix enviado para\s+/, '')
           .replace(/^transf pix recebida\s*-\s*/, '')
           .replace(/\(pedido[^)]*\)/g, '')
@@ -1625,7 +1795,7 @@
         if (!key) return null;
         if (state.vendorMemory[key]) return { key, ...state.vendorMemory[key] };
         for (const k of Object.keys(state.vendorMemory)) {
-          if (key.includes(k) || k.includes(key)) return { key: k, ...state.vendorMemory[k] };
+          if (key.includes(k) || k.includes(key)) return { key, ...state.vendorMemory[k] };
         }
         return null;
       }
@@ -1662,7 +1832,8 @@
           return;
         }
 
-        const unit = entry.unidade === 'TODAS' ? 'Lacqua V - 125' : entry.unidade;
+        const firstPjUnit = (state.units.find(u => u.scope === 'PJ') || state.units[0] || { nome: 'TODAS' }).nome;
+        const unit = entry.unidade === 'TODAS' ? firstPjUnit : entry.unidade;
         let rec = state.monthlyRecords.find(r => r.mes_num === mNum && r.unidade === unit);
         if (!rec) {
           rec = { mes_num: mNum, unidade: unit, receita: 0, condominio: 0, energia: 0, lavanderia: 0, iptu: 0, comissao: 0, despesas: 0, financiamento: 0 };
@@ -1702,14 +1873,14 @@
       }
 
       /* ========================================================================
-         FORMATAÇÃO & TOASTS
+         FORMATAÇÃO & TOASTS (COM ESCAPEHTML ANTI-XSS)
          ======================================================================== */
       function formatBRL(val) {
         return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       }
 
-      function formatPct(val) {
-        return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+      function formatPct(val, decimals = 1) {
+        return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + '%';
       }
 
       function showToast(title, message, variant = 'cyan') {
@@ -1722,7 +1893,7 @@
         };
         const toast = document.createElement('div');
         toast.className = `pointer-events-auto p-3.5 rounded-xl border backdrop-blur-xl shadow-2xl ${colors[variant] || colors.cyan}`;
-        toast.innerHTML = `<div class="flex items-start justify-between gap-2"><div><div class="text-xs font-extrabold">${title}</div><div class="text-[11px] text-slate-300 mt-0.5">${message}</div></div><button type="button" class="text-slate-400 hover:text-white text-xs" onclick="this.parentElement.parentElement.remove()">✕</button></div>`;
+        toast.innerHTML = `<div class="flex items-start justify-between gap-2"><div><div class="text-xs font-extrabold">${escapeHtml(title)}</div><div class="text-[11px] text-slate-300 mt-0.5">${escapeHtml(message)}</div></div><button type="button" class="text-slate-400 hover:text-white text-xs" onclick="this.parentElement.parentElement.remove()">✕</button></div>`;
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 4200);
       }
@@ -1732,8 +1903,7 @@
          ======================================================================== */
       function getUnitScope(unitName) {
         const found = state.units.find(u => u.nome === unitName);
-        if (found) return found.scope;
-        return (unitName === 'Piazza - 416' || unitName === 'Spazzio - 713') ? 'PF' : 'PJ';
+        return found ? found.scope : 'PJ';
       }
 
       function computeMonthlyMetrics(monthNum, scopeFilter) {
@@ -1750,7 +1920,7 @@
         const lucroPreAjuste = receita - despOp - financiamento - imposto;
         const lucroFinal = lucroPreAjuste + ajuste;
         const saidasTotais = despOp + financiamento + imposto + (ajuste < 0 ? Math.abs(ajuste) : 0);
-        return { mes_num: monthNum, mes_nome: MONTH_NAMES[monthNum], receita, despOp, financiamento, imposto, ajuste, lucroPreAjuste, lucroFinal, saidasTotais };
+        return { mes_num: monthNum, mes_nome: MONTH_NAMES[monthNum] || '', receita, despOp, financiamento, imposto, ajuste, lucroPreAjuste, lucroFinal, saidasTotais };
       }
 
       function computeAggregatedMetrics() {
@@ -1771,7 +1941,7 @@
         document.getElementById('kpiDespesasOp').textContent = formatBRL(agg.despOp);
         document.getElementById('kpiFinanciamentos').textContent = formatBRL(agg.financiamento);
         document.getElementById('kpiImpostosAjuste').textContent = formatBRL(agg.imposto - agg.ajuste);
-        document.getElementById('kpiImpostosSub').textContent = `DAS+DARF: ${formatBRL(agg.imposto)} | Irmão: ${formatBRL(agg.ajuste)}`;
+        document.getElementById('kpiImpostosSub').textContent = `DAS+DARF: ${formatBRL(agg.imposto)} | Sócio: ${formatBRL(agg.ajuste)}`;
         document.getElementById('kpiLucroFinal').textContent = formatBRL(agg.lucroFinal);
         document.getElementById('kpiMargemBadge').textContent = formatPct(agg.receita > 0 ? (agg.lucroFinal / agg.receita) * 100 : 0);
 
@@ -1786,8 +1956,8 @@
           applyBtn.disabled = true; applyBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           const mNum = Number(mFilter);
-          document.getElementById('brotherMonthTag').textContent = `${MONTH_NAMES[mNum]}/2026`;
-          document.getElementById('brotherDirectionHint').textContent = `Ajuste ativo em ${MONTH_NAMES[mNum]}: ${formatBRL(agg.ajuste)}.`;
+          document.getElementById('brotherMonthTag').textContent = `${MONTH_NAMES[mNum] || ''}/2026`;
+          document.getElementById('brotherDirectionHint').textContent = `Ajuste ativo em ${MONTH_NAMES[mNum] || ''}: ${formatBRL(agg.ajuste)}.`;
           applyBtn.disabled = false; applyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
         updateBrotherCalculatorPreview();
@@ -1798,7 +1968,7 @@
           const isSel = String(m) === String(mFilter);
           rowsHtml += `
             <tr onclick="selectMonthFromTable(${m})" class="cursor-pointer hover:bg-cyan-400/10 ${isSel ? 'bg-cyan-400/15' : ''}">
-              <td class="py-3 px-3 font-semibold text-white">${d.mes_nome}/2026</td>
+              <td class="py-3 px-3 font-semibold text-white">${escapeHtml(d.mes_nome)}/2026</td>
               <td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(d.receita)}</td>
               <td class="py-3 px-3 text-right money text-pink-300">${formatBRL(d.despOp)}</td>
               <td class="py-3 px-3 text-right money text-sky-300">${formatBRL(d.financiamento)}</td>
@@ -1825,10 +1995,10 @@
           document.getElementById('calcEqualTarget').textContent = 'R$ 0,00';
           return;
         }
-        const vitorNet = Number(raw);
-        const lucasPre = computeAggregatedMetrics().lucroPreAjuste;
-        const equalTarget = (lucasPre + vitorNet) / 2;
-        const needed = equalTarget - lucasPre;
+        const partnerNet = Number(raw);
+        const titularPre = computeAggregatedMetrics().lucroPreAjuste;
+        const equalTarget = (titularPre + partnerNet) / 2;
+        const needed = equalTarget - titularPre;
         document.getElementById('calcAdjustmentValue').textContent = (needed >= 0 ? '+' : '') + formatBRL(needed);
         document.getElementById('calcEqualTarget').textContent = formatBRL(equalTarget);
       }
@@ -1903,7 +2073,7 @@
           const hit = chartHitBoxes.find(b => (cx - rect.left) >= b.xStart && (cx - rect.left) <= b.xEnd);
           if (!hit) { tooltip.classList.add('hidden'); return; }
           const d = hit.data;
-          tooltip.innerHTML = `<div class="font-bold text-white border-b border-white/10 pb-1 mb-1">${d.mes_nome}/2026</div>
+          tooltip.innerHTML = `<div class="font-bold text-white border-b border-white/10 pb-1 mb-1">${escapeHtml(d.mes_nome)}/2026</div>
             <div class="flex justify-between gap-4"><span class="text-cyan-300">Receita:</span><span class="money font-semibold">${formatBRL(d.receita)}</span></div>
             <div class="flex justify-between gap-4"><span class="text-pink-300">Saídas:</span><span class="money font-semibold">${formatBRL(d.saidasTotais)}</span></div>
             <div class="flex justify-between gap-4"><span class="text-violet-300">Lucro:</span><span class="money font-bold text-cyan-300">${formatBRL(d.lucroFinal)}</span></div>`;
@@ -1917,11 +2087,11 @@
       }
 
       /* ========================================================================
-         APARTAMENTOS
+         APARTAMENTOS (100% ESCAPED)
          ======================================================================== */
       function renderApartments() {
         const mFilter = state.monthFilter;
-        document.getElementById('aptFilterIndicator').textContent = `Período: ${mFilter === 'all' ? 'Acumulado Jan–Nov' : MONTH_NAMES[Number(mFilter)] + '/2026'}`;
+        document.getElementById('aptFilterIndicator').textContent = `Período: ${mFilter === 'all' ? 'Acumulado Jan–Nov' : (MONTH_NAMES[Number(mFilter)] || '') + '/2026'}`;
         const units = state.units.filter(u => state.scopeFilter === 'all' || u.scope === state.scopeFilter);
 
         let cardsHtml = '', tableHtml = '';
@@ -1944,11 +2114,11 @@
             <div class="liquid-glass liquid-glass-hover p-4 flex flex-col justify-between space-y-3">
               <div>
                 <div class="flex items-center justify-between gap-2">
-                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${badge}">${u.regime}</span>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${badge}">${escapeHtml(u.regime)}</span>
                   <span class="money text-xs font-bold ${margin >= 0 ? 'text-cyan-300' : 'text-rose-300'}">${formatPct(margin)}</span>
                 </div>
-                <h3 class="text-base font-extrabold text-white mt-2">${u.nome}</h3>
-                <p class="text-[11px] text-slate-400">${u.nota}</p>
+                <h3 class="text-base font-extrabold text-white mt-2">${escapeHtml(u.nome)}</h3>
+                <p class="text-[11px] text-slate-400">${escapeHtml(u.nota)}</p>
               </div>
               <div class="space-y-1.5 pt-2 border-t border-white/10 text-xs">
                 <div class="flex justify-between"><span class="text-slate-400">Receita:</span><span class="money text-cyan-300 font-semibold">${formatBRL(rec)}</span></div>
@@ -1962,8 +2132,8 @@
 
           tableHtml += `
             <tr class="hover:bg-white/5">
-              <td class="py-3 px-3 font-bold text-white">${u.nome}</td>
-              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${badge}">${u.regime}</span></td>
+              <td class="py-3 px-3 font-bold text-white">${escapeHtml(u.nome)}</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${badge}">${escapeHtml(u.regime)}</span></td>
               <td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(rec)}</td>
               <td class="py-3 px-3 text-right money text-slate-300">${formatBRL(cond)}</td>
               <td class="py-3 px-3 text-right money text-slate-300">${formatBRL(ene)}</td>
@@ -2013,6 +2183,11 @@
         return list;
       }
 
+      function getDefaultUnitName() {
+        const pj = state.units.find(u => u.scope === 'PJ');
+        return pj ? pj.nome : (state.units[0] ? state.units[0].nome : 'TODAS');
+      }
+
       function getPlanoContasGroupsForCb(isEntrada) {
         const groups = isEntrada ? state.planoEntradas : state.planoSaidas;
         return groups.map(g => ({ label: g.grupo, items: g.contas.map(c => ({ value: c, label: c })) }));
@@ -2040,9 +2215,12 @@
       }
 
       function initFormComboboxes() {
+        const defUnit = getDefaultUnitName();
+        const favUnits = [...state.units.filter(u => u.scope === 'PJ').slice(0, 4).map(u => u.nome), 'TODAS'];
+
         createNeonCombobox('cb-entryAccount', {
           id: 'entryAccount', value: 'LUMINE PJ (BTG)',
-          groups: [{ label: 'Contas Bancárias', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'LUCAS PF (Conta Física)', label: 'LUCAS PF (Conta Física)' }] }]
+          groups: [{ label: 'Contas Bancárias', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }]
         });
 
         createNeonCombobox('cb-entryType', {
@@ -2052,8 +2230,8 @@
         });
 
         createNeonCombobox('cb-entryUnit', {
-          id: 'entryUnit', value: 'Lacqua V - 125',
-          favorites: ['Lacqua V - 125', 'Lacqua V - 237', 'Lacqua V - 246', 'Piazza - 912', 'TODAS'],
+          id: 'entryUnit', value: defUnit,
+          favorites: favUnits,
           groups: getUnitGroupsCompactForCb()
         });
 
@@ -2074,7 +2252,7 @@
 
         createNeonCombobox('cb-ledgerAccountFilter', {
           id: 'ledgerAccountFilter', value: 'all', compact: true,
-          groups: [{ label: 'Filtrar Conta', items: [{ value: 'all', label: 'Todas as Contas' }, { value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'LUCAS PF (Conta Física)', label: 'LUCAS PF (Conta Física)' }] }],
+          groups: [{ label: 'Filtrar Conta', items: [{ value: 'all', label: 'Todas as Contas' }, { value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }],
           onChange: val => { state.ledgerAccountFilter = val; renderCustomLedger(); }
         });
 
@@ -2125,17 +2303,17 @@
         setComboboxValue('entryAccount', 'LUMINE PJ (BTG)', false);
         setComboboxValue('entryType', 'Débito (Saída)', false);
         syncFormClassificationDropdowns();
-        setComboboxValue('entryUnit', 'Lacqua V - 125', false);
+        setComboboxValue('entryUnit', getDefaultUnitName(), false);
         setComboboxValue('entryPlanoContas', 'Contratos a Pagar (2.1.05.01.09)', true);
         document.getElementById('entryDocumento').value = 'Contrato Arrendamento / PIX';
-        document.getElementById('entryDescription').value = 'Transferência PIX do Arrendamento para o CPF do Lucas';
+        document.getElementById('entryDescription').value = 'Transferência PIX do Arrendamento para o CPF Titular';
         document.getElementById('entryNotes').value = 'Contajá: Contratos a Pagar 2.1.05.01.09 (nunca usar Distribuição de Lucros)';
         checkContajaRuleBanner();
         document.getElementById('entryAmount').focus();
       };
 
       /* ========================================================================
-         FILA DE CONCILIAÇÃO RÁPIDA (CLOUD)
+         FILA DE CONCILIAÇÃO RÁPIDA (CLOUD + 100% ESCAPED)
          ======================================================================== */
       function renderPendingQueue() {
         const container = document.getElementById('pendingQueueContainer');
@@ -2152,29 +2330,37 @@
         container.innerHTML = state.pendingQueue.map(item => {
           const isCredit = item.tipo.includes('Crédito');
           const memMatch = findVendorMemory(item.descricao);
+          const safeId = escapeHtml(item.id);
           return `
             <div class="p-4 rounded-xl bg-slate-950/70 border border-white/10 space-y-3">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="font-mono text-xs text-slate-400">${item.data}</span>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isCredit ? 'bg-emerald-500/20 text-emerald-300' : 'bg-pink-500/20 text-pink-300'}">${item.tipo}</span>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300">FITID: ${item.fitid || 'MANUAL'}</span>
+                  <span class="font-mono text-xs text-slate-400">${escapeHtml(item.data)}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isCredit ? 'bg-emerald-500/20 text-emerald-300' : 'bg-pink-500/20 text-pink-300'}">${escapeHtml(item.tipo)}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300">FITID: ${escapeHtml(item.fitid || 'MANUAL')}</span>
                   ${memMatch ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">🧠 Memória Aprendida</span>' : ''}
-                  <span class="font-bold text-sm text-white">${item.descricao}</span>
+                  <span class="font-bold text-sm text-white">${escapeHtml(item.descricao)}</span>
                 </div>
                 <div class="money text-base font-extrabold ${isCredit ? 'text-cyan-300' : 'text-pink-300'}">${formatBRL(item.valor)}</div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-end">
-                <div class="lg:col-span-2"><label class="block text-[10px] text-slate-400 mb-1">Unidade</label><div id="cb-p-unit-${item.id}"></div></div>
-                <div class="lg:col-span-4"><label class="block text-[10px] text-cyan-300 mb-1">Plano de Contas</label><div id="cb-p-plano-${item.id}"></div></div>
-                <div class="lg:col-span-3"><label class="block text-[10px] text-violet-300 mb-1">Gerencial</label><div id="cb-p-ger-${item.id}"></div></div>
+                <div class="lg:col-span-2"><label class="block text-[10px] text-slate-400 mb-1">Unidade</label><div id="cb-p-unit-${safeId}"></div></div>
+                <div class="lg:col-span-4"><label class="block text-[10px] text-cyan-300 mb-1">Plano de Contas</label><div id="cb-p-plano-${safeId}"></div></div>
+                <div class="lg:col-span-3"><label class="block text-[10px] text-violet-300 mb-1">Gerencial</label><div id="cb-p-ger-${safeId}"></div></div>
                 <div class="lg:col-span-3 flex items-center gap-2">
-                  <button type="button" onclick="confirmPendingItem('${item.id}')" class="btn-neon-cyan flex-1 py-2 px-3 rounded-xl text-xs font-bold h-[34px]">✓ Conciliar</button>
-                  <button type="button" onclick="dismissPendingItem('${item.id}')" class="px-2.5 py-2 rounded-xl text-xs text-slate-400 hover:text-rose-300 border border-white/10 h-[34px]">✕</button>
+                  <button type="button" data-conciliar-id="${safeId}" class="btn-queue-conciliar btn-neon-cyan flex-1 py-2 px-3 rounded-xl text-xs font-bold h-[34px]">✓ Conciliar</button>
+                  <button type="button" data-dismiss-id="${safeId}" class="btn-queue-dismiss px-2.5 py-2 rounded-xl text-xs text-slate-400 hover:text-rose-300 border border-white/10 h-[34px]">✕</button>
                 </div>
               </div>
             </div>`;
         }).join('');
+
+        container.querySelectorAll('.btn-queue-conciliar').forEach(btn => {
+          btn.addEventListener('click', () => window.confirmPendingItem(btn.getAttribute('data-conciliar-id')));
+        });
+        container.querySelectorAll('.btn-queue-dismiss').forEach(btn => {
+          btn.addEventListener('click', () => window.dismissPendingItem(btn.getAttribute('data-dismiss-id')));
+        });
 
         state.pendingQueue.forEach(item => {
           const isCredit = item.tipo.includes('Crédito');
@@ -2191,7 +2377,7 @@
       }
 
       window.confirmPendingItem = async function (id) {
-        const item = state.pendingQueue.find(p => p.id === id);
+        const item = state.pendingQueue.find(p => String(p.id) === String(id));
         if (!item || !supabaseClient) return;
         const unit = getComboboxValue(`p-unit-${id}`) || item.sugUnidade;
         const plano = getComboboxValue(`p-plano-${id}`) || item.sugPlano;
@@ -2234,19 +2420,19 @@
         await syncEntryFinancialImpactToSupabase(newEntry, +1);
 
         state.customLedger.unshift(newEntry);
-        state.pendingQueue = state.pendingQueue.filter(p => p.id !== id);
+        state.pendingQueue = state.pendingQueue.filter(p => String(p.id) !== String(id));
         refreshAllViews();
         showToast('Conciliado na Nuvem!', `${item.descricao} salvo no Supabase.`, 'emerald');
       };
 
       window.dismissPendingItem = async function (id) {
         if (supabaseClient) await supabaseClient.from('fila_conciliacao').delete().eq('id', id);
-        state.pendingQueue = state.pendingQueue.filter(p => p.id !== id);
+        state.pendingQueue = state.pendingQueue.filter(p => String(p.id) !== String(id));
         renderPendingQueue();
       };
 
       /* ========================================================================
-         LIVRO-RAZÃO + EDIÇÃO (✏️) + EXCLUSÃO (🗑️) NO SUPABASE
+         LIVRO-RAZÃO + EDIÇÃO (✏️) + EXCLUSÃO (🗑️) (100% ESCAPED)
          ======================================================================== */
       function renderCustomLedger() {
         const tbody = document.getElementById('customEntriesBody');
@@ -2264,27 +2450,35 @@
         }
         tbody.innerHTML = filtered.map(item => {
           const isCredit = item.tipo.includes('Crédito');
+          const safeId = escapeHtml(item.id);
           return `
             <tr class="hover:bg-white/5 align-top">
-              <td class="py-3 px-3 whitespace-nowrap"><div class="font-mono text-white font-semibold">${item.data}</div><div class="text-[10px] text-slate-400">${MONTH_NAMES[item.mes_num] || ''}/2026</div></td>
-              <td class="py-3 px-3"><div class="font-bold text-cyan-300">${item.unidade}</div><div class="text-[10px] text-slate-400">${item.conta}</div></td>
-              <td class="py-3 px-3"><div class="font-semibold text-white">${item.descricao}</div><div class="text-[10px] text-slate-400">${item.documento || 'Sem doc.'}</div></td>
-              <td class="py-3 px-3"><span class="inline-block px-2 py-1 rounded-lg bg-cyan-500/10 border border-cyan-400/25 text-cyan-200 text-[11px]">${item.plano_contas}</span></td>
-              <td class="py-3 px-3 space-y-1"><div class="font-semibold text-violet-300 text-[11px]">${item.gerencial}</div><span class="inline-block px-2 py-0.5 rounded border text-[10px] font-bold ${getRfbBadgeStyle(item.rfb)}">${item.rfb}</span></td>
-              <td class="py-3 px-3 max-w-[200px]"><span class="text-[10px] text-slate-300 block">${item.pgdas}</span></td>
+              <td class="py-3 px-3 whitespace-nowrap"><div class="font-mono text-white font-semibold">${escapeHtml(item.data)}</div><div class="text-[10px] text-slate-400">${escapeHtml(MONTH_NAMES[item.mes_num] || '')}/2026</div></td>
+              <td class="py-3 px-3"><div class="font-bold text-cyan-300">${escapeHtml(item.unidade)}</div><div class="text-[10px] text-slate-400">${escapeHtml(item.conta)}</div></td>
+              <td class="py-3 px-3"><div class="font-semibold text-white">${escapeHtml(item.descricao)}</div><div class="text-[10px] text-slate-400">${escapeHtml(item.documento || 'Sem doc.')}</div></td>
+              <td class="py-3 px-3"><span class="inline-block px-2 py-1 rounded-lg bg-cyan-500/10 border border-cyan-400/25 text-cyan-200 text-[11px]">${escapeHtml(item.plano_contas)}</span></td>
+              <td class="py-3 px-3 space-y-1"><div class="font-semibold text-violet-300 text-[11px]">${escapeHtml(item.gerencial)}</div><span class="inline-block px-2 py-0.5 rounded border text-[10px] font-bold ${getRfbBadgeStyle(item.rfb)}">${escapeHtml(item.rfb)}</span></td>
+              <td class="py-3 px-3 max-w-[200px]"><span class="text-[10px] text-slate-300 block">${escapeHtml(item.pgdas)}</span></td>
               <td class="py-3 px-3 text-right whitespace-nowrap"><div class="money font-bold ${isCredit ? 'text-emerald-300' : 'text-pink-300'}">${isCredit ? '+' : '-'}${formatBRL(item.valor)}</div></td>
               <td class="py-3 px-3 text-center">
                 <div class="inline-flex flex-col items-center gap-1">
-                  <button type="button" onclick="deleteLedgerItem('${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-300 hover:bg-rose-500/15" title="Excluir lançamento">🗑️</button>
-                  <button type="button" onclick="openEditModal('${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/15" title="Editar lançamento">✏️</button>
+                  <button type="button" data-del-id="${safeId}" class="btn-ledger-del p-1.5 rounded-lg text-slate-400 hover:text-rose-300 hover:bg-rose-500/15" title="Excluir lançamento">🗑️</button>
+                  <button type="button" data-edit-id="${safeId}" class="btn-ledger-edit p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/15" title="Editar lançamento">✏️</button>
                 </div>
               </td>
             </tr>`;
         }).join('');
+
+        tbody.querySelectorAll('.btn-ledger-del').forEach(btn => {
+          btn.addEventListener('click', () => window.deleteLedgerItem(btn.getAttribute('data-del-id')));
+        });
+        tbody.querySelectorAll('.btn-ledger-edit').forEach(btn => {
+          btn.addEventListener('click', () => window.openEditModal(btn.getAttribute('data-edit-id')));
+        });
       }
 
       window.openEditModal = function (id) {
-        const item = state.customLedger.find(x => x.id === id);
+        const item = state.customLedger.find(x => String(x.id) === String(id));
         if (!item) return;
 
         document.getElementById('editEntryId').value = item.id;
@@ -2298,7 +2492,7 @@
 
         createNeonCombobox('cb-editAccount', {
           id: 'editAccount', value: item.conta,
-          groups: [{ label: 'Contas', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'LUCAS PF (Conta Física)', label: 'LUCAS PF (Conta Física)' }] }]
+          groups: [{ label: 'Contas', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }]
         });
 
         createNeonCombobox('cb-editType', {
@@ -2374,18 +2568,18 @@
       };
 
       window.deleteLedgerItem = async function (id) {
-        const item = state.customLedger.find(i => i.id === id);
+        const item = state.customLedger.find(i => String(i.id) === String(id));
         if (!item || !supabaseClient) return;
         const { error } = await supabaseClient.from('lancamentos').delete().eq('id', id);
         if (error) { showToast('Erro ao Excluir', error.message, 'rose'); return; }
         await syncEntryFinancialImpactToSupabase(item, -1);
-        state.customLedger = state.customLedger.filter(i => i.id !== id);
+        state.customLedger = state.customLedger.filter(i => String(i.id) !== String(id));
         refreshAllViews();
         showToast('Lançamento Excluído', 'Saldo recalculado na nuvem.', 'rose');
       };
 
       /* ========================================================================
-         PARSER .OFX & DEDUPLICAÇÃO
+         PARSER .OFX & DEDUPLICAÇÃO (100% ESCAPED + ZERO DADOS REAIS)
          ======================================================================== */
       function extractOfxTag(blk, tag) {
         const m = blk.match(new RegExp(`<${tag}>([^<\\r\\n]+)`, 'i'));
@@ -2401,23 +2595,26 @@
         const memMatch = findVendorMemory(memo);
         if (memMatch) return { unidade: memMatch.unidade, plano: memMatch.plano, gerencial: memMatch.gerencial, pgdas: memMatch.pgdas };
         const isCredit = amount >= 0, txt = normalizeText(memo);
+        const defUnit = getDefaultUnitName();
         if (isCredit) {
-          if (txt.includes('acolher')) return { unidade: 'Lacqua V - 125', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0] };
-          if (txt.includes('lr hospedagem')) return { unidade: 'Lacqua V - 237', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0] };
-          if (txt.includes('ntravel')) return { unidade: 'Piazza - 912', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0] };
-          if (txt.includes('remunera') || txt.includes('rendimento')) return { unidade: 'TODAS', plano: 'Rendimentos de Aplicações Financeiras (3.1.03.01.01)', gerencial: 'RECEITA', pgdas: 'Não se aplica' };
+          if (txt.includes('hospedagem') || txt.includes('turismo') || txt.includes('reserva')) {
+            return { unidade: defUnit, plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0] };
+          }
+          if (txt.includes('remunera') || txt.includes('rendimento')) {
+            return { unidade: 'TODAS', plano: 'Rendimentos de Aplicações Financeiras (3.1.03.01.01)', gerencial: 'RECEITA', pgdas: 'Não se aplica' };
+          }
           return { unidade: 'TODAS', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'RECEITA', pgdas: PGDAS_OPTIONS[0] };
         }
-        if (txt.includes('arrendamento') || txt.includes('lucas parreira')) return { unidade: 'Lacqua V - 125', plano: 'Contratos a Pagar (2.1.05.01.09)', gerencial: 'ALUGUEL', pgdas: 'Não se aplica' };
-        if (txt.includes('equatorial') || txt.includes('energia')) return { unidade: 'Lacqua V - 125', plano: 'Energia Elétrica (3.2.03.01.05)', gerencial: 'ENERGIA', pgdas: 'Não se aplica' };
-        if (txt.includes('condom')) return { unidade: txt.includes('piazza') ? 'Piazza - 912' : 'Lacqua V - 125', plano: 'Alugueis e Condomínios (3.2.03.01.06)', gerencial: 'CONDOMÍNIO', pgdas: 'Não se aplica' };
+        if (txt.includes('arrendamento')) return { unidade: defUnit, plano: 'Contratos a Pagar (2.1.05.01.09)', gerencial: 'ALUGUEL', pgdas: 'Não se aplica' };
+        if (txt.includes('equatorial') || txt.includes('energia')) return { unidade: defUnit, plano: 'Energia Elétrica (3.2.03.01.05)', gerencial: 'ENERGIA', pgdas: 'Não se aplica' };
+        if (txt.includes('condom')) return { unidade: defUnit, plano: 'Alugueis e Condomínios (3.2.03.01.06)', gerencial: 'CONDOMÍNIO', pgdas: 'Não se aplica' };
         if (txt.includes('darf')) return { unidade: 'TODAS', plano: 'DARF folha (2.1.02.01.08)', gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica' };
         if (txt.includes('das') || txt.includes('simples')) return { unidade: 'TODAS', plano: 'Simples Nacional (DAS) (2.1.04.01.01)', gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica' };
         return { unidade: 'TODAS', plano: 'Despesas Gerais (3.2.03.01.21)', gerencial: 'OUTRAS DEPESAS', pgdas: 'Não se aplica' };
       }
 
       function parseOfxContent(rawText) {
-        const bankId = extractOfxTag(rawText, 'BANKID') || 'BTG / Banco';
+        const bankId = extractOfxTag(rawText, 'BANKID') || 'Banco';
         const acctId = extractOfxTag(rawText, 'ACCTID') || 'Conta Corrente';
         const dtStart = parseOfxDate(extractOfxTag(rawText, 'DTSTART'));
         const dtEnd = parseOfxDate(extractOfxTag(rawText, 'DTEND'));
@@ -2459,10 +2656,10 @@
           <tr class="${tx.isDuplicate ? 'opacity-45 bg-amber-950/15' : 'hover:bg-white/5'}">
             <td class="py-2.5 px-3 whitespace-nowrap">
               ${tx.isDuplicate ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">Duplicado</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Novo</span>'}
-              <div class="font-mono text-[10px] text-slate-400 mt-0.5">${tx.fitid}</div>
+              <div class="font-mono text-[10px] text-slate-400 mt-0.5">${escapeHtml(tx.fitid)}</div>
             </td>
-            <td class="py-2.5 px-3 font-mono text-slate-300">${tx.data}</td>
-            <td class="py-2.5 px-3 font-semibold text-white max-w-[220px]">${tx.memo}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-300">${escapeHtml(tx.data)}</td>
+            <td class="py-2.5 px-3 font-semibold text-white max-w-[220px]">${escapeHtml(tx.memo)}</td>
             <td class="py-2.5 px-3 text-right money font-bold ${tx.isCredit ? 'text-cyan-300' : 'text-pink-300'}">${tx.isCredit ? '+' : '-'}${formatBRL(tx.absValue)}</td>
             <td class="py-2.5 px-3"><div id="cb-ofx-unit-${tx.idx}"></div></td>
             <td class="py-2.5 px-3"><div id="cb-ofx-plano-${tx.idx}"></div></td>
@@ -2512,10 +2709,10 @@
       };
 
       window.downloadSampleBTGOfx = function () {
-        const ofx = `OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\n<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><BANKACCTFROM><BANKID>0208<ACCTID>00459182-1</BANKACCTFROM><BANKTRANLIST><DTSTART>20261120<DTEND>20261128\n<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261125<TRNAMT>3420.50<FITID>BTG20261125001<MEMO>Transf Pix recebida - ACOLHER TURISMO LTDA (Lacqua 125)</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261126<TRNAMT>-960.00<FITID>BTG20261126003<MEMO>Pix enviado para Lucas Parreira Castro - Arrendamento</STMTTRN>\n</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>`;
+        const ofx = `OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\n<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><BANKACCTFROM><BANKID>0208<ACCTID>00000000-0</BANKACCTFROM><BANKTRANLIST><DTSTART>20261120<DTEND>20261128\n<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261125<TRNAMT>3420.50<FITID>DEMO20261125001<MEMO>Transf Pix recebida - OPERADORA TURISMO EXEMPLO LTDA</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261126<TRNAMT>-960.00<FITID>DEMO20261126003<MEMO>Pix enviado - Arrendamento Mensal</STMTTRN>\n</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>`;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([ofx], { type: 'application/x-ofx' }));
-        a.download = 'extrato_btg_teste_nov2026.ofx';
+        a.download = 'extrato_exemplo_nov2026.ofx';
         a.click();
       };
 
@@ -2540,8 +2737,8 @@
 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.keys(state.closings).map(k => {
           const m = Number(k), d = computeMonthlyMetrics(m, 'all');
-          return { Mes_Num: m, Mes: MONTH_NAMES[m], Receita: Number(d.receita.toFixed(2)), Imposto_DAS_DAF: Number(state.closings[m].imposto || 0), Ajuste_Irmao_Vitor: Number(state.closings[m].ajuste || 0), Lucro_Lucas: Number(d.lucroFinal.toFixed(2)) };
-        })), 'Fechamentos_Irmao_DAS');
+          return { Mes_Num: m, Mes: MONTH_NAMES[m], Receita: Number(d.receita.toFixed(2)), Imposto_DAS_DAF: Number(state.closings[m].imposto || 0), Ajuste_Socio: Number(state.closings[m].ajuste || 0), Lucro_Liquido: Number(d.lucroFinal.toFixed(2)) };
+        })), 'Fechamentos_Socio_DAS');
 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.gerencialRfb.map(g => ({ Classificacao_Gerencial: g.gerencial, Enquadramento_RFB: g.rfb }))), 'Plano_Contas_Aba4');
         XLSX.writeFile(wb, `Backup_Lumine_Supabase_${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -2549,7 +2746,7 @@
       };
 
       /* ========================================================================
-         ABA 4 & ABA 5
+         ABA 4 & ABA 5 (100% ESCAPED & DADOS FISCAIS DO SUPABASE)
          ======================================================================== */
       function renderCatalogTab() {
         const filter = state.catalogFilter, q = normalizeText(state.catalogSearch || '');
@@ -2559,16 +2756,16 @@
         let html = '';
         if (filter === 'all' || filter === 'rfb') {
           const rows = state.gerencialRfb.filter(g => !q || normalizeText(g.gerencial).includes(q) || normalizeText(g.rfb).includes(q));
-          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-white">Matriz Classificações Gerenciais × RFB (${rows.length})</h3><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead><tr class="border-b border-white/10 text-slate-400 uppercase"><th class="py-2 px-3">Gerencial</th><th class="py-2 px-3">Enquadramento RFB</th></tr></thead><tbody class="divide-y divide-white/5">${rows.map(g => `<tr><td class="py-2 px-3 font-bold text-white">${g.gerencial}</td><td class="py-2 px-3"><span class="px-2 py-0.5 rounded border text-[11px] font-bold ${getRfbBadgeStyle(g.rfb)}">${g.rfb}</span></td></tr>`).join('')}</tbody></table></div></div>`;
+          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-white">Matriz Classificações Gerenciais × RFB (${rows.length})</h3><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead><tr class="border-b border-white/10 text-slate-400 uppercase"><th class="py-2 px-3">Gerencial</th><th class="py-2 px-3">Enquadramento RFB</th></tr></thead><tbody class="divide-y divide-white/5">${rows.map(g => `<tr><td class="py-2 px-3 font-bold text-white">${escapeHtml(g.gerencial)}</td><td class="py-2 px-3"><span class="px-2 py-0.5 rounded border text-[11px] font-bold ${getRfbBadgeStyle(g.rfb)}">${escapeHtml(g.rfb)}</span></td></tr>`).join('')}</tbody></table></div></div>`;
         }
         if (filter === 'all' || filter === 'entradas') {
-          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-cyan-300">Plano de Contas — Entradas</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoEntradas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-cyan-400/20"><div class="text-xs font-extrabold text-cyan-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || normalizeText(c).includes(q)).map(c => `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-cyan-300">Plano de Contas — Entradas</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoEntradas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-cyan-400/20"><div class="text-xs font-extrabold text-cyan-300 uppercase mb-2">${escapeHtml(g.grupo)}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || normalizeText(c).includes(q)).map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
         }
         if (filter === 'all' || filter === 'saidas') {
-          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-pink-300">Plano de Contas — Saídas</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoSaidas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-pink-400/20"><div class="text-xs font-extrabold text-pink-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || normalizeText(c).includes(q)).map(c => c.includes('2.1.05.01.09') ? `<li class="text-amber-300 font-bold bg-amber-500/10 border border-amber-400/30 px-2 py-1 rounded-lg">${c}</li>` : `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-pink-300">Plano de Contas — Saídas</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoSaidas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-pink-400/20"><div class="text-xs font-extrabold text-pink-300 uppercase mb-2">${escapeHtml(g.grupo)}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || normalizeText(c).includes(q)).map(c => c.includes('2.1.05.01.09') ? `<li class="text-amber-300 font-bold bg-amber-500/10 border border-amber-400/30 px-2 py-1 rounded-lg">${escapeHtml(c)}</li>` : `<li>${escapeHtml(c)}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
         }
         if (filter === 'all' || filter === 'pgdas') {
-          html += `<div class="liquid-glass p-5 space-y-2"><h3 class="text-base font-bold text-violet-300">Atividades PGDAS-D</h3>${PGDAS_OPTIONS.map((p, i) => `<div class="p-3 rounded-xl bg-slate-950/65 border border-white/10 text-xs text-slate-200"><strong>#${i + 1}:</strong> ${p}</div>`).join('')}</div>`;
+          html += `<div class="liquid-glass p-5 space-y-2"><h3 class="text-base font-bold text-violet-300">Atividades PGDAS-D</h3>${PGDAS_OPTIONS.map((p, i) => `<div class="p-3 rounded-xl bg-slate-950/65 border border-white/10 text-xs text-slate-200"><strong>#${i + 1}:</strong> ${escapeHtml(p)}</div>`).join('')}</div>`;
         }
         document.getElementById('catalogSectionsContainer').innerHTML = html;
       }
@@ -2579,11 +2776,21 @@
         document.getElementById('newCatRfbWrap').classList.toggle('hidden', target !== 'gerencial');
         if (target !== 'gerencial') {
           const list = target === 'entrada' ? state.planoEntradas : state.planoSaidas;
-          document.getElementById('newCatGroup').innerHTML = list.map(g => `<option value="${g.grupo}">${g.grupo}</option>`).join('');
+          document.getElementById('newCatGroup').innerHTML = list.map(g => `<option value="${escapeHtml(g.grupo)}">${escapeHtml(g.grupo)}</option>`).join('');
         }
       }
 
       function renderTaxAndSqlTab() {
+        const fc = state.fiscalConfig || {};
+        const effStr = fc.aliquota_efetiva > 0 ? formatPct(fc.aliquota_efetiva, 4) : 'Anexo III';
+        document.getElementById('navTaxRateBadge').textContent = effStr;
+        document.getElementById('taxHeaderTitle').textContent = `Simples Nacional — ${fc.faixa_descricao || 'Anexo III'}${fc.aliquota_efetiva > 0 ? ' (Alíquota Efetiva ' + effStr + ')' : ''}`;
+        document.getElementById('taxRbt12Val').textContent = formatBRL(fc.rbt12 || 0);
+        document.getElementById('taxFaixaDesc').textContent = fc.faixa_descricao || 'Parâmetro carregado da nuvem';
+        document.getElementById('taxAliquotaNominalVal').textContent = formatPct(fc.aliquota_nominal || 0, 2);
+        document.getElementById('taxParcelaDeduzirVal').textContent = formatBRL(fc.parcela_deduzir || 0);
+        document.getElementById('taxAliquotaEfetivaVal').textContent = formatPct(fc.aliquota_efetiva || 0, 4);
+
         const taxMonth = document.getElementById('taxMonthSelect').value;
         const pjUnits = state.units.filter(u => u.scope === 'PJ');
         let totalPjRev = 0;
@@ -2595,7 +2802,7 @@
         let totalDas = taxMonth === 'all' ? [1,2,3,4,5,6,7,8,9,10,11].reduce((s, m) => s + Number((state.closings[m] || {}).imposto || 0), 0) : Number((state.closings[Number(taxMonth)] || {}).imposto || 0);
         document.getElementById('dasRateioBody').innerHTML = rows.map(item => {
           const share = totalPjRev > 0 ? item.rev / totalPjRev : 0;
-          return `<tr><td class="py-3 px-3 font-bold text-white">${item.unidade}</td><td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(item.rev)}</td><td class="py-3 px-3 text-right money text-slate-300">${formatPct(share * 100)}</td><td class="py-3 px-3 text-right money font-bold text-violet-300">${formatBRL(totalDas * share)}</td></tr>`;
+          return `<tr><td class="py-3 px-3 font-bold text-white">${escapeHtml(item.unidade)}</td><td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(item.rev)}</td><td class="py-3 px-3 text-right money text-slate-300">${formatPct(share * 100)}</td><td class="py-3 px-3 text-right money font-bold text-violet-300">${formatBRL(totalDas * share)}</td></tr>`;
         }).join('') + `<tr class="bg-violet-950/30 font-bold border-t-2 border-violet-400/35"><td class="py-3 px-3 text-white">TOTAL LUMINE PJ</td><td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(totalPjRev)}</td><td class="py-3 px-3 text-right money text-white">100,0%</td><td class="py-3 px-3 text-right money text-violet-300">${formatBRL(totalDas)}</td></tr>`;
       }
 
@@ -2664,21 +2871,70 @@
               const rawMsg = error ? error.message : 'Erro desconhecido';
               let friendly = `Erro Supabase: ${rawMsg}`;
               if (rawMsg.includes('Invalid login credentials')) {
-                friendly = 'E-mail ou senha incorretos no Supabase — confira em Authentication → Users se o usuário foi criado e se a senha está igual.';
+                friendly = 'E-mail ou senha incorretos no Supabase.';
               } else if (rawMsg.includes('Email not confirmed')) {
-                friendly = 'E-mail ainda não confirmado. No Supabase → Authentication → Users, clique no usuário e marque como confirmado.';
+                friendly = 'E-mail ainda não confirmado no painel Authentication → Users.';
               } else if (rawMsg.includes('Failed to fetch')) {
-                friendly = 'Não foi possível alcançar o servidor Supabase. Clique na engrenagem ⚙️ abaixo e confira a URL e a Publishable Key.';
+                friendly = 'Não foi possível alcançar o servidor Supabase. Confira a URL na engrenagem ⚙️.';
               }
               errBox.textContent = friendly;
               errBox.classList.remove('hidden');
               return;
             }
-            await enterAuthenticatedShell(data.user);
+            await checkMfaAndEnterShell(data.user);
           } catch (netErr) {
             btn.disabled = false; btn.textContent = '🔓 Entrar no Sistema na Nuvem';
             errBox.textContent = `Falha de conexão: ${netErr.message || 'Verifique a URL do Supabase'}`;
             errBox.classList.remove('hidden');
+          }
+        });
+
+        document.getElementById('mfaVerifyForm').addEventListener('submit', async e => {
+          e.preventDefault();
+          if (!supabaseClient || !pendingMfaFactorId) return;
+          const btn = document.getElementById('mfaVerifySubmitBtn');
+          const errBox = document.getElementById('mfaErrorMsg');
+          const code = document.getElementById('mfaLoginCodeInput').value.trim();
+          btn.disabled = true; btn.textContent = '⏳ Validando 2FA...';
+          errBox.classList.add('hidden');
+
+          try {
+            const { data: challengeData, error: chErr } = await supabaseClient.auth.mfa.challenge({ factorId: pendingMfaFactorId });
+            if (chErr) throw chErr;
+            const { error: verErr } = await supabaseClient.auth.mfa.verify({
+              factorId: pendingMfaFactorId,
+              challengeId: challengeData.id,
+              code
+            });
+            if (verErr) throw verErr;
+            const { data: userData } = await supabaseClient.auth.getUser();
+            btn.disabled = false; btn.textContent = '✓ Validar Código 2FA & Acessar';
+            await enterAuthenticatedShell(userData.user);
+          } catch (err) {
+            btn.disabled = false; btn.textContent = '✓ Validar Código 2FA & Acessar';
+            errBox.textContent = 'Código 2FA inválido ou expirado. Confira o relógio do celular e tente novamente.';
+            errBox.classList.remove('hidden');
+          }
+        });
+
+        document.getElementById('mfaConfirmEnrollForm').addEventListener('submit', async e => {
+          e.preventDefault();
+          if (!supabaseClient || !enrollingMfaFactorId) return;
+          const code = document.getElementById('mfaEnrollCodeInput').value.trim();
+          try {
+            const { data: challengeData, error: chErr } = await supabaseClient.auth.mfa.challenge({ factorId: enrollingMfaFactorId });
+            if (chErr) throw chErr;
+            const { error: verErr } = await supabaseClient.auth.mfa.verify({
+              factorId: enrollingMfaFactorId,
+              challengeId: challengeData.id,
+              code
+            });
+            if (verErr) throw verErr;
+            enrollingMfaFactorId = null;
+            showToast('2FA Ativado com Sucesso!', 'A partir do próximo login, o código de 6 dígitos será exigido.', 'emerald');
+            await refreshMfaStatusUI();
+          } catch (err) {
+            showToast('Código Incorreto', err.message || 'Verifique os 6 dígitos no autenticador.', 'rose');
           }
         });
 
@@ -2709,11 +2965,11 @@
         document.getElementById('brotherNetInput').addEventListener('input', updateBrotherCalculatorPreview);
         document.getElementById('applyBrotherBtn').addEventListener('click', async () => {
           if (state.monthFilter === 'all' || !supabaseClient) return;
-          const vitorNet = Number(document.getElementById('brotherNetInput').value);
-          if (isNaN(vitorNet)) return;
+          const partnerNet = Number(document.getElementById('brotherNetInput').value);
+          if (isNaN(partnerNet)) return;
           const mNum = Number(state.monthFilter);
-          const lucasPre = computeAggregatedMetrics().lucroPreAjuste;
-          const novoAjuste = Number((((lucasPre + vitorNet) / 2) - lucasPre).toFixed(2));
+          const titularPre = computeAggregatedMetrics().lucroPreAjuste;
+          const novoAjuste = Number((((titularPre + partnerNet) / 2) - titularPre).toFixed(2));
           if (!state.closings[mNum]) state.closings[mNum] = { imposto: 0, ajuste: 0 };
           state.closings[mNum].ajuste = novoAjuste;
 
@@ -2722,7 +2978,7 @@
           }, { onConflict: 'ano,mes_num' });
 
           refreshAllViews();
-          showToast('Gravado na Nuvem!', `Equalização de ${MONTH_NAMES[mNum]}/2026 salva no Supabase.`, 'violet');
+          showToast('Gravado na Nuvem!', `Equalização de ${MONTH_NAMES[mNum] || ''}/2026 salva no Supabase.`, 'violet');
         });
 
         document.getElementById('manualEntryForm').addEventListener('submit', async e => {
@@ -2771,7 +3027,7 @@
           e.preventDefault();
           if (!supabaseClient) return;
           const id = document.getElementById('editEntryId').value;
-          const oldEntry = state.customLedger.find(x => x.id === id);
+          const oldEntry = state.customLedger.find(x => String(x.id) === String(id));
           if (!oldEntry) return;
 
           const newValor = parseFloat(document.getElementById('editAmount').value || '0');
@@ -2812,7 +3068,7 @@
             pgdas: updatedLocal.pgdas
           });
 
-          const idx = state.customLedger.findIndex(x => x.id === id);
+          const idx = state.customLedger.findIndex(x => String(x.id) === String(id));
           if (idx !== -1) state.customLedger[idx] = updatedLocal;
 
           closeEditModal();
@@ -2849,7 +3105,7 @@
         function renderSheetTab(name) {
           const rows = XLSX.utils.sheet_to_json(currentWorkbook.Sheets[name], { header: 1 });
           document.getElementById('sheetRowCount').textContent = `${rows.length} linhas`;
-          document.getElementById('sheetPreviewTable').innerHTML = rows.slice(0, 25).map((r, i) => `<tr class="${i === 0 ? 'bg-slate-900 font-bold text-cyan-300' : 'border-t border-white/5'}">${r.map(c => `<td class="py-1.5 px-2.5">${c ?? ''}</td>`).join('')}</tr>`).join('');
+          document.getElementById('sheetPreviewTable').innerHTML = rows.slice(0, 25).map((r, i) => `<tr class="${i === 0 ? 'bg-slate-900 font-bold text-cyan-300' : 'border-t border-white/5'}">${r.map(c => `<td class="py-1.5 px-2.5">${escapeHtml(c ?? '')}</td>`).join('')}</tr>`).join('');
         }
         fileInput.addEventListener('change', e => processUploadedFile(e.target.files[0]));
         dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
@@ -2901,7 +3157,7 @@
         if (hasConfig && supabaseClient) {
           const { data: { session } } = await supabaseClient.auth.getSession();
           if (session && session.user) {
-            await enterAuthenticatedShell(session.user);
+            await checkMfaAndEnterShell(session.user);
           }
         }
       }
