@@ -98,6 +98,7 @@
     .glow-magenta { border-color: rgba(255, 42, 133, 0.35); box-shadow: 0 12px 32px -12px rgba(255, 42, 133, 0.24), inset 0 1px 0 rgba(255, 42, 133, 0.26); }
     .glow-blue { border-color: rgba(56, 189, 248, 0.35); box-shadow: 0 12px 32px -12px rgba(56, 189, 248, 0.24), inset 0 1px 0 rgba(56, 189, 248, 0.26); }
     .glow-emerald { border-color: rgba(0, 230, 118, 0.35); box-shadow: 0 12px 32px -12px rgba(0, 230, 118, 0.24), inset 0 1px 0 rgba(0, 230, 118, 0.26); }
+    .glow-amber { border-color: rgba(251, 191, 36, 0.42); box-shadow: 0 12px 32px -12px rgba(251, 191, 36, 0.24), inset 0 1px 0 rgba(251, 191, 36, 0.26); }
 
     .money { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 
@@ -138,6 +139,15 @@
     }
     .btn-neon-emerald:hover { background: linear-gradient(135deg, rgba(0, 230, 118, 0.34), rgba(0, 245, 212, 0.28)); transform: translateY(-1px); }
 
+    .btn-neon-amber {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.24), rgba(245, 158, 11, 0.2));
+      border: 1px solid rgba(251, 191, 36, 0.6);
+      color: #fde68a;
+      box-shadow: 0 0 20px -5px rgba(251, 191, 36, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.2s ease;
+    }
+    .btn-neon-amber:hover { background: linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(245, 158, 11, 0.3)); transform: translateY(-1px); }
+
     .tab-btn { color: #94a3b8; border-radius: 0.85rem; border: 1px solid transparent; transition: all 0.2s ease; }
     .tab-btn:hover { color: #f8fafc; background: rgba(255, 255, 255, 0.05); }
     .tab-btn.active {
@@ -149,6 +159,9 @@
 
     .dropzone-glass { border: 1.5px dashed rgba(0, 245, 212, 0.38); background: rgba(8, 14, 30, 0.55); transition: all 0.22s ease; }
     .dropzone-glass:hover, .dropzone-glass.drag-over { border-color: #00f5d4; background: rgba(0, 245, 212, 0.08); }
+
+    .dropzone-amber { border: 1.5px dashed rgba(251, 191, 36, 0.45); background: rgba(18, 14, 8, 0.55); transition: all 0.22s ease; }
+    .dropzone-amber:hover, .dropzone-amber.drag-over { border-color: #fbbf24; background: rgba(251, 191, 36, 0.09); }
 
     /* NEON COMBOBOX PORTAL */
     .neon-cb-portal {
@@ -195,9 +208,7 @@
     <div class="orb orb-magenta"></div>
   </div>
 
-  <!-- Portal Flutuante Único para Comboboxes Inteligentes -->
   <div id="neonCbPortal" class="neon-cb-portal hidden" role="listbox"></div>
-
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
   <!-- ========================================================================
@@ -215,13 +226,11 @@
         <p class="text-xs text-slate-400">Acesso Restrito • Supabase Auth + MFA 2FA + RLS</p>
       </div>
 
-      <!-- Caixa de Configuração Inicial (Fica OCULTA automaticamente assim que conectada) -->
       <div id="supabaseConfigBox" class="hidden p-3.5 rounded-xl bg-slate-950/85 border border-cyan-400/35 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-cyan-300">🔌 Configurar Conexão Supabase</span>
           <button type="button" id="closeSupabaseConfigBtn" class="hidden text-xs text-slate-400 hover:text-white">✕</button>
         </div>
-
         <div class="space-y-2.5">
           <div>
             <label for="sbUrlInput" class="block text-[11px] text-slate-400 mb-1">Project URL</label>
@@ -237,7 +246,6 @@
         </div>
       </div>
 
-      <!-- Formulário de Login Autenticado no Servidor -->
       <form id="loginForm" class="space-y-4">
         <div>
           <label for="loginEmail" class="block text-xs font-semibold text-slate-300 mb-1.5">E-mail Cadastrado no Supabase</label>
@@ -266,11 +274,10 @@
         </div>
       </form>
 
-      <!-- Etapa 2: Verificação em Duas Etapas (2FA TOTP) -->
       <form id="mfaVerifyForm" class="hidden space-y-4">
         <div class="p-3.5 rounded-xl bg-violet-950/35 border border-violet-400/35 text-xs text-slate-200 space-y-1">
           <div class="font-bold text-violet-300">🔐 Verificação em Duas Etapas (2FA Ativo)</div>
-          <p class="text-slate-300">Abra seu aplicativo autenticador (Google Authenticator / Authy) e digite o código de 6 dígitos.</p>
+          <p class="text-slate-300">Abra seu aplicativo autenticador e digite o código de 6 dígitos.</p>
         </div>
 
         <div>
@@ -393,7 +400,6 @@
         <button type="button" onclick="closeSecurityModal()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10">✕</button>
       </div>
 
-      <!-- Backup Excel -->
       <div class="p-4 rounded-xl bg-emerald-950/25 border border-emerald-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h4 class="text-sm font-bold text-emerald-300">Cópia de Segurança Completa (.XLSX)</h4>
@@ -404,7 +410,6 @@
         </button>
       </div>
 
-      <!-- Verificação em Duas Etapas (2FA TOTP) -->
       <div class="p-4 rounded-xl bg-violet-950/25 border border-violet-400/35 space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -414,13 +419,12 @@
           <div id="mfaActionButtons"></div>
         </div>
 
-        <!-- Área de Pareamento QR Code -->
         <div id="mfaEnrollBox" class="hidden pt-3 border-t border-white/10 space-y-3">
           <p class="text-xs text-slate-300">1. Escaneie o QR Code abaixo no <strong>Google Authenticator</strong> ou <strong>Authy</strong> (ou cole a chave secreta):</p>
           <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-950/80 p-3.5 rounded-xl border border-white/10">
             <img id="mfaQrImg" alt="QR Code 2FA" class="w-36 h-36 rounded-lg bg-white p-1.5 shrink-0" />
             <div class="space-y-2 w-full">
-              <div class="text-[11px] text-slate-400">Chave Secreta (caso digite manualmente):</div>
+              <div class="text-[11px] text-slate-400">Chave Secreta:</div>
               <div id="mfaSecretText" class="font-mono text-xs text-cyan-300 bg-black/50 px-2.5 py-1.5 rounded border border-white/10 break-all select-all">-</div>
               <form id="mfaConfirmEnrollForm" class="flex items-center gap-2 pt-1">
                 <input type="text" id="mfaEnrollCodeInput" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="Código 6 dígitos" class="glass-input money w-36 px-3 py-2 text-xs text-center font-bold" />
@@ -431,7 +435,6 @@
         </div>
       </div>
 
-      <!-- Alterar Senha -->
       <form id="changePasswordForm" class="p-4 rounded-xl bg-slate-950/65 border border-white/10 space-y-3">
         <h4 class="text-sm font-bold text-white">Alterar Senha no Supabase (<span id="secCurrentUserEmail" class="font-mono text-cyan-300">-</span>)</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -452,7 +455,7 @@
   </div>
 
   <!-- ========================================================================
-       SHELL AUTENTICADO (SÓ APARECE APÓS LOGIN + 2FA NO SUPABASE)
+       SHELL AUTENTICADO
        ======================================================================== -->
   <div id="appShell" class="hidden">
 
@@ -510,7 +513,7 @@
           <button data-tab="tab-overview" class="tab-btn active px-3 py-2 text-xs font-semibold whitespace-nowrap">1. Visão Geral</button>
           <button data-tab="tab-apartments" class="tab-btn px-3 py-2 text-xs font-semibold whitespace-nowrap">2. Apartamentos (8 Un.)</button>
           <button data-tab="tab-entries" class="tab-btn flex items-center gap-1.5 px-3 py-2 text-xs font-semibold whitespace-nowrap">
-            <span>3. Lançamentos, Edição &amp; OFX</span>
+            <span>3. Lançamentos, Edição &amp; Planilhas</span>
             <span id="pendingBadge" class="px-1.5 py-0.5 text-[10px] font-mono rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/35">0</span>
           </button>
           <button data-tab="tab-catalog" class="tab-btn flex items-center gap-1.5 px-3 py-2 text-xs font-semibold whitespace-nowrap">
@@ -558,11 +561,10 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
-          <div class="text-left md:text-right">
-            <div class="text-[11px] text-slate-400">Banco de Dados</div>
-            <div class="text-xs font-semibold text-emerald-300">PostgreSQL Nuvem • RLS + 2FA</div>
-          </div>
+        <div class="flex flex-wrap items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
+          <button type="button" onclick="openOfficialSheetSync()" class="btn-neon-amber px-3.5 py-2.5 rounded-xl text-xs font-extrabold whitespace-nowrap">
+            📊 Sincronizar Planilhas Reais (.XLSX)
+          </button>
           <button type="button" onclick="switchTab('tab-entries')" class="btn-neon-cyan px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap">
             + Classificar / Lançar
           </button>
@@ -720,7 +722,7 @@
                   <th class="py-3 px-3 text-right">Condomínio</th>
                   <th class="py-3 px-3 text-right">Energia</th>
                   <th class="py-3 px-3 text-right">Lavanderia</th>
-                  <th class="py-3 px-3 text-right">IPTU / Arrend. / Outros</th>
+                  <th class="py-3 px-3 text-right">IPTU / Comis. / Outros</th>
                   <th class="py-3 px-3 text-right">Financ. PF</th>
                   <th class="py-3 px-3 text-right">Resultado</th>
                   <th class="py-3 px-3 text-right">Margem</th>
@@ -733,9 +735,109 @@
         </div>
       </div>
 
-      <!-- ABA 3: LANÇAMENTOS, EDIÇÃO & IMPORTAÇÃO OFX -->
+      <!-- ABA 3: LANÇAMENTOS, EDIÇÃO & IMPORTAÇÃO DE PLANILHAS / OFX -->
       <div id="tab-entries" class="tab-panel hidden space-y-6">
 
+        <!-- ==================================================================
+             SINCRONIZADOR OFICIAL DE PLANILHAS REAIS (CALDAS 2026 + MOVIMENTAÇÃO)
+             ================================================================== -->
+        <section id="officialSheetSyncSection" class="liquid-glass glow-amber p-5 sm:p-6 space-y-5">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400/15 text-amber-300 border border-amber-400/40">
+                🚀 Substituição de Dados Estimados por Dados 100% Reais (Célula por Célula)
+              </span>
+              <h2 class="text-base sm:text-lg font-bold text-white mt-1.5">
+                Sincronizador Oficial: <span class="text-amber-300">Caldas 2026.xlsx</span> + <span class="text-cyan-300">Movimentação Lumine.xlsx</span>
+              </h2>
+              <p class="text-xs text-slate-300 mt-0.5">
+                Selecione uma ou ambas as planilhas oficiais abaixo. O sistema lê todas as abas mensais (Jan–Nov, incluindo <em>Exclusive 1108</em>, <em>Lacqua 134</em>, <em>Lacqua 246</em> abaixo do Total) e os 338 lançamentos classificados, exibindo os totais exatos para conferência antes de gravar no Supabase.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Upload 1: Caldas 2026.xlsx -->
+            <label id="caldas2026Dropzone" class="dropzone-amber rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer gap-1.5">
+              <div class="text-2xl">🏢</div>
+              <div class="text-xs sm:text-sm font-bold text-amber-200">1. Planilha Mensal de Apartamentos (Caldas 2026.xlsx)</div>
+              <div id="caldas2026FileBadge" class="text-[11px] text-slate-400">Clique para selecionar <span class="font-mono text-amber-300">Caldas 2026.xlsx</span></div>
+              <input type="file" id="caldas2026FileInput" accept=".xlsx,.xls" class="hidden" />
+            </label>
+
+            <!-- Upload 2: Movimentação Lumine.xlsx -->
+            <label id="movLumineDropzone" class="dropzone-glass rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer gap-1.5">
+              <div class="text-2xl">📒</div>
+              <div class="text-xs sm:text-sm font-bold text-cyan-200">2. Livro-Razão 4 Eixos (Movimentação Lumine.xlsx)</div>
+              <div id="movLumineFileBadge" class="text-[11px] text-slate-400">Clique para selecionar <span class="font-mono text-cyan-300">Movimentação Lumine.xlsx</span></div>
+              <input type="file" id="movLumineFileInput" accept=".xlsx,.xls" class="hidden" />
+            </label>
+          </div>
+
+          <!-- Painel de Conferência Pré-Gravação -->
+          <div id="officialSyncPreviewBox" class="hidden space-y-4 pt-4 border-t border-white/10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3.5 rounded-xl bg-slate-950/80 border border-amber-400/35">
+                <div class="text-[10px] uppercase text-amber-300 font-bold">Receita Janeiro / 2026</div>
+                <div id="syncCheckJanRev" class="money text-lg font-extrabold text-white mt-0.5">R$ 0,00</div>
+                <div id="syncCheckJanSub" class="text-[10px] text-slate-400 mt-0.5">Meta planilha: R$ 51.670,99</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-950/80 border border-cyan-400/35">
+                <div class="text-[10px] uppercase text-cyan-300 font-bold">Receita Acumulada 2026</div>
+                <div id="syncCheckTotalRev" class="money text-lg font-extrabold text-cyan-300 mt-0.5">R$ 0,00</div>
+                <div id="syncCheckTotalSub" class="text-[10px] text-slate-400 mt-0.5">Meta planilha: R$ 330.529,52</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-950/80 border border-violet-400/35">
+                <div class="text-[10px] uppercase text-violet-300 font-bold">Linhas Aptos / Mês Lidas</div>
+                <div id="syncCheckAptRows" class="money text-lg font-extrabold text-violet-300 mt-0.5">0</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Abas Janeiro a Novembro</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-950/80 border border-emerald-400/35">
+                <div class="text-[10px] uppercase text-emerald-300 font-bold">Lançamentos 4 Eixos Lidos</div>
+                <div id="syncCheckLedgerRows" class="money text-lg font-extrabold text-emerald-300 mt-0.5">0</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Aba Extrato (Movimentação)</div>
+              </div>
+            </div>
+
+            <!-- Conferência Mês a Mês com Edição Fina de DAS/DARF e Ajuste Sócio -->
+            <div id="syncMonthlyAuditWrap" class="hidden space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span class="text-xs font-bold text-amber-200">Conferência Mês a Mês (Caldas 2026.xlsx) — Ajuste Impostos ou Sócio se necessário antes de gravar:</span>
+              </div>
+              <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/70">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="border-b border-white/10 bg-slate-900/90 text-[10px] uppercase text-slate-400">
+                      <th class="py-2 px-3">Mês</th>
+                      <th class="py-2 px-3 text-center">Unidades Lidas</th>
+                      <th class="py-2 px-3 text-right">Receita Bruta</th>
+                      <th class="py-2 px-3 text-right">Cond. + Energia</th>
+                      <th class="py-2 px-3 text-right">Comis./Desp./IPTU/Lav.</th>
+                      <th class="py-2 px-3 text-right">Financ. PF</th>
+                      <th class="py-2 px-3 text-right min-w-[130px]">Imposto DAS+DARF (R$)</th>
+                      <th class="py-2 px-3 text-right min-w-[130px]">Ajuste Sócio (R$)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="syncMonthlyAuditBody" class="divide-y divide-white/5"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-emerald-950/30 border border-emerald-400/40">
+              <div class="text-xs text-slate-200">
+                <strong>Pronto para substituir no Supabase:</strong> Os registros antigos das tabelas selecionadas serão limpos e substituídos pelos dados reais acima.
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="resetOfficialSyncPreview()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                <button type="button" id="commitOfficialSheetsBtn" onclick="commitOfficialSheetsToSupabase()" class="btn-neon-emerald px-5 py-2.5 rounded-xl text-xs font-extrabold whitespace-nowrap">
+                  🚀 Substituir no Supabase Agora (100% Real)
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Formulário Manual 4 Eixos -->
         <section class="liquid-glass glow-cyan p-5 sm:p-6">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
             <div>
@@ -856,14 +958,14 @@
           <div id="pendingQueueContainer" class="space-y-3"></div>
         </section>
 
-        <!-- Importador .OFX & Planilhas -->
+        <!-- Importador .OFX & Planilhas Avulsas -->
         <section class="liquid-glass glow-cyan p-5 sm:p-6 space-y-5">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             <div>
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-400/15 text-cyan-300 border border-cyan-400/35">
                 Open Financial Exchange (.OFX) + Deduplicação FITID na Nuvem
               </span>
-              <h3 class="text-base sm:text-lg font-bold text-white mt-1">Importador de Extrato Bancário (.OFX) e Planilhas (.XLSX / .CSV)</h3>
+              <h3 class="text-base sm:text-lg font-bold text-white mt-1">Importador de Extrato Bancário (.OFX) e Visualizador (.XLSX / .CSV)</h3>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -875,12 +977,11 @@
 
           <label id="bankDropzone" class="dropzone-glass rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer gap-2">
             <div class="text-2xl">📂</div>
-            <div class="text-sm font-bold text-white">Clique para selecionar ou arraste seu extrato aqui</div>
+            <div class="text-sm font-bold text-white">Clique para selecionar ou arraste seu extrato .OFX aqui</div>
             <div class="text-xs text-slate-400">Formatos: <span class="font-mono text-cyan-300">.OFX</span> (BTG, Itaú, Cora, Caixa, BB) ou <span class="font-mono text-violet-300">.XLSX / .XLS / .CSV</span></div>
             <input type="file" id="spreadsheetFileInput" accept=".ofx,.xlsx,.xls,.csv" class="hidden" />
           </label>
 
-          <!-- Preview OFX -->
           <div id="ofxPreviewBox" class="hidden space-y-4 pt-4 border-t border-white/10">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div class="p-3 rounded-xl bg-slate-950/75 border border-white/10">
@@ -932,7 +1033,6 @@
             </div>
           </div>
 
-          <!-- Preview Planilha -->
           <div id="sheetPreviewBox" class="hidden space-y-3 pt-3 border-t border-white/10">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div class="flex items-center gap-2">
@@ -1049,7 +1149,7 @@
         <div id="catalogSectionsContainer" class="space-y-6"></div>
       </div>
 
-      <!-- ABA 5: FISCAL SIMPLES NACIONAL (DADOS CARREGADOS DO SUPABASE) -->
+      <!-- ABA 5: FISCAL SIMPLES NACIONAL -->
       <div id="tab-sql" class="tab-panel hidden space-y-6">
         <section class="liquid-glass glow-violet p-5 sm:p-6 space-y-5">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -1118,9 +1218,6 @@
     (function () {
       'use strict';
 
-      // ========================================================================
-      // CONFIGURAÇÃO DO SUPABASE (ZERO DADOS SENSÍVEIS NO CÓDIGO PÚBLICO)
-      // ========================================================================
       const DEFAULT_SUPABASE_URL = '';
       const DEFAULT_SUPABASE_ANON_KEY = '';
       const SUPABASE_CFG_STORAGE_KEY = 'lumine_supabase_connection_v1';
@@ -1133,8 +1230,19 @@
       const MONTH_NAMES = {
         1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
         5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
-        9: 'Setembro', 10: 'Outubro', 11: 'Novembro'
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
       };
+
+      const CANONICAL_UNITS_SEED = [
+        { nome: 'Lacqua V - 125', regime: 'LUMINE PJ', escopo: 'PJ', nota: 'Unidade Empresarial PJ' },
+        { nome: 'Lacqua V - 237', regime: 'LUMINE PJ', escopo: 'PJ', nota: 'Unidade Empresarial PJ' },
+        { nome: 'Lacqua V - 246', regime: 'LUMINE PJ', escopo: 'PJ', nota: 'Unidade Empresarial PJ' },
+        { nome: 'Lacqua V - 134', regime: 'LUMINE PJ', escopo: 'PJ', nota: 'Unidade Empresarial PJ' },
+        { nome: 'Piazza - 912', regime: 'LUMINE PJ', escopo: 'PJ', nota: 'Unidade Empresarial PJ' },
+        { nome: 'Piazza - 416', regime: 'PF • FINANCIADO', escopo: 'PF', nota: 'Unidade PF Financiada' },
+        { nome: 'Spazzio - 713', regime: 'PF • FINANCIADO', escopo: 'PF', nota: 'Unidade PF Financiada' },
+        { nome: 'Exclusive - 1108', regime: 'AVULSO', escopo: 'PJ', nota: 'Operação Avulsa / Temporada' }
+      ];
 
       const PGDAS_OPTIONS = [
         '7.6) Não sujeitos ao fator “r” e tributados pelo Anexo III, sem retenção/substituição tributária de ISS, com ISS devido ao próprio Município do estabelecimento',
@@ -1191,12 +1299,21 @@
         }
       };
 
+      let officialSyncDraft = {
+        caldasLoaded: false,
+        movLoaded: false,
+        aptRecords: [],
+        monthlySummary: {},
+        ledgerEntries: [],
+        vendorMemEntries: {}
+      };
+
       let currentOfxParsed = null;
       let currentWorkbook = null;
       let chartHitBoxes = [];
 
       /* ========================================================================
-         SANITIZAÇÃO ANTI-XSS (ESCAPA HTML EM 100% DAS INJEÇÕES DOM)
+         SANITIZAÇÃO ANTI-XSS
          ======================================================================== */
       function escapeHtml(str) {
         return String(str ?? '')
@@ -1357,7 +1474,7 @@
           supabaseClient.from('classificacoes_gerenciais').select('*').order('nome_gerencial'),
           supabaseClient.from('registros_mensais_aptos').select('*').eq('ano', 2026),
           supabaseClient.from('fechamentos_mensais').select('*').eq('ano', 2026),
-          supabaseClient.from('lancamentos').select('*').order('data_movimento', { ascending: false }).order('created_at', { ascending: false }),
+          supabaseClient.from('lancamentos').select('*').order('data_movimento', { ascending: false }).order('created_at', { ascending: false }).limit(2000),
           supabaseClient.from('fila_conciliacao').select('*').order('data_movimento', { ascending: true }),
           supabaseClient.from('memoria_fornecedores').select('*'),
           supabaseClient.from('configuracoes_fiscais').select('*').eq('ano', 2026).maybeSingle()
@@ -1529,13 +1646,549 @@
         m.classList.add('hidden'); m.classList.remove('flex');
       };
 
+      window.openOfficialSheetSync = function () {
+        switchTab('tab-entries');
+        const sec = document.getElementById('officialSheetSyncSection');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+
       /* ========================================================================
-         COMBOBOX INTELIGENTE (SUBSTRING + SEM ACENTO + TECLADO)
+         PARSERS OFICIAIS: CALDAS 2026.XLSX & MOVIMENTAÇÃO LUMINE.XLSX
          ======================================================================== */
       function normalizeText(str) {
         return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
       }
 
+      function parseBrCurrency(val) {
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return isNaN(val) ? 0 : Number(val.toFixed(2));
+        let s = String(val).trim();
+        if (!s || s === '-' || s === 'R$ -') return 0;
+        let isNeg = false;
+        if (s.startsWith('(') && s.endsWith(')')) {
+          isNeg = true;
+          s = s.slice(1, -1);
+        }
+        s = s.replace(/R\$/gi, '').replace(/\s+/g, '');
+        if (s.includes(',')) {
+          s = s.replace(/\./g, '').replace(',', '.');
+        }
+        const n = parseFloat(s);
+        if (isNaN(n)) return 0;
+        return Number(((isNeg ? -Math.abs(n) : n)).toFixed(2));
+      }
+
+      function parseExcelDateToISO(val) {
+        if (val === null || val === undefined || val === '') return '2026-11-28';
+        if (typeof val === 'number' && val > 20000) {
+          const dt = new Date(Math.round((val - 25569) * 86400 * 1000));
+          const y = dt.getUTCFullYear();
+          const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+          const d = String(dt.getUTCDate()).padStart(2, '0');
+          return `${y}-${m}-${d}`;
+        }
+        const s = String(val).trim();
+        const brMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (brMatch) {
+          return `${brMatch[3]}-${brMatch[2].padStart(2, '0')}-${brMatch[1].padStart(2, '0')}`;
+        }
+        const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+        return '2026-11-28';
+      }
+
+      function parseCompetenciaMonth(compVal, fallbackIsoDate) {
+        if (typeof compVal === 'number' && compVal > 20000) {
+          const dt = new Date(Math.round((compVal - 25569) * 86400 * 1000));
+          return dt.getUTCMonth() + 1;
+        }
+        const s = String(compVal || '').trim();
+        const mMatch = s.match(/^(\d{1,2})\/(\d{4})$/);
+        if (mMatch) {
+          const m = parseInt(mMatch[1], 10);
+          if (m >= 1 && m <= 12) return m;
+        }
+        const fb = parseInt((fallbackIsoDate || '2026-11-28').split('-')[1], 10);
+        return fb >= 1 && fb <= 12 ? fb : 11;
+      }
+
+      function canonicalUnitName(raw) {
+        const t = normalizeText(raw);
+        if (!t) return '';
+        if (t === 'todas' || t === 'geral') return 'TODAS';
+        if (t.includes('125')) return 'Lacqua V - 125';
+        if (t.includes('237')) return 'Lacqua V - 237';
+        if (t.includes('246')) return 'Lacqua V - 246';
+        if (t.includes('134')) return 'Lacqua V - 134';
+        if (t.includes('912')) return 'Piazza - 912';
+        if (t.includes('416')) return 'Piazza - 416';
+        if (t.includes('713')) return 'Spazzio - 713';
+        if (t.includes('1108') || t.includes('exclusive')) return 'Exclusive - 1108';
+        return '';
+      }
+
+      function monthNumberFromSheetName(sheetName) {
+        const s = normalizeText(sheetName);
+        if (s.startsWith('jan')) return 1;
+        if (s.startsWith('fev')) return 2;
+        if (s.startsWith('mar')) return 3;
+        if (s.startsWith('abr')) return 4;
+        if (s.startsWith('mai')) return 5;
+        if (s.startsWith('jun')) return 6;
+        if (s.startsWith('jul')) return 7;
+        if (s.startsWith('ago')) return 8;
+        if (s.startsWith('set')) return 9;
+        if (s.startsWith('out')) return 10;
+        if (s.startsWith('nov')) return 11;
+        if (s.startsWith('dez')) return 12;
+        return 0;
+      }
+
+      function parseCaldas2026Workbook(workbook) {
+        const aptRecordsMap = new Map();
+        const monthlySummary = {};
+
+        for (let m = 1; m <= 11; m++) {
+          monthlySummary[m] = {
+            mes_num: m,
+            mes_nome: MONTH_NAMES[m],
+            unitsCount: 0,
+            receita: 0,
+            condominio: 0,
+            energia: 0,
+            lavanderia: 0,
+            comissao: 0,
+            despesas: 0,
+            iptu: 0,
+            financiamento: 0,
+            imposto: 0,
+            ajuste: 0
+          };
+        }
+
+        workbook.SheetNames.forEach(sheetName => {
+          const mNum = monthNumberFromSheetName(sheetName);
+          if (mNum >= 1 && mNum <= 11) {
+            const ws = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+            if (!rows || rows.length === 0) return;
+
+            let headerRowIdx = 0;
+            for (let i = 0; i < Math.min(8, rows.length); i++) {
+              const rNorm = rows[i].map(c => normalizeText(c));
+              if (rNorm.some(c => c === 'apto' || c === 'apartamento' || c === 'receita')) {
+                headerRowIdx = i;
+                break;
+              }
+            }
+
+            const headers = rows[headerRowIdx].map(c => normalizeText(c));
+            const colApto = headers.findIndex(h => h.includes('apto') || h.includes('apartamento') || h.includes('unidade'));
+            const idxApto = colApto >= 0 ? colApto : 0;
+            const idxReceita = headers.findIndex(h => h.includes('receita') || h.includes('entrada') || h.includes('aluguel'));
+            const idxCond = headers.findIndex(h => h.includes('condom'));
+            const idxEnergia = headers.findIndex(h => h.includes('energia'));
+            const idxLav = headers.findIndex(h => h.includes('lavand'));
+            const idxComissao = headers.findIndex(h => h.includes('comiss'));
+            const idxDespesas = headers.findIndex(h => h.includes('despesa'));
+            const idxIptu = headers.findIndex(h => h.includes('iptu'));
+            const idxFinanc = headers.findIndex(h => h.includes('financ'));
+
+            for (let r = headerRowIdx + 1; r < rows.length; r++) {
+              const row = rows[r];
+              if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
+
+              const labelRaw = String(row[idxApto] ?? '').trim();
+              const labelNorm = normalizeText(labelRaw);
+
+              if (!labelNorm) continue;
+              if (labelNorm === 'total' || labelNorm.startsWith('total ') || labelNorm.startsWith('subtotal') || labelNorm.startsWith('ganho') || labelNorm.startsWith('lucro') || labelNorm.startsWith('saldo')) {
+                continue;
+              }
+
+              // Verifica se a linha é um imposto (DAS / DARF) ou acerto com Vitor fora da tabela de aptos
+              if (labelNorm.includes('das') || labelNorm.includes('darf') || labelNorm.includes('imposto') || labelNorm.includes('simples')) {
+                const rowVals = row.slice(1).map(parseBrCurrency).filter(v => v !== 0);
+                if (rowVals.length > 0) {
+                  monthlySummary[mNum].imposto = Number((monthlySummary[mNum].imposto + Math.abs(rowVals[0])).toFixed(2));
+                }
+                continue;
+              }
+
+              if (labelNorm.includes('vitor') || labelNorm.includes('irmao') || labelNorm.includes('acerto') || labelNorm.includes('divisao') || labelNorm.includes('socio')) {
+                const rowVals = row.slice(1).map(parseBrCurrency).filter(v => v !== 0);
+                if (rowVals.length > 0) {
+                  monthlySummary[mNum].ajuste = Number(rowVals[0].toFixed(2));
+                }
+                continue;
+              }
+
+              const unitName = canonicalUnitName(labelRaw);
+              if (unitName && unitName !== 'TODAS') {
+                const key = `${mNum}::${unitName}`;
+                const existing = aptRecordsMap.get(key) || {
+                  mes_num: mNum,
+                  unidade: unitName,
+                  receita: 0,
+                  condominio: 0,
+                  energia: 0,
+                  lavanderia: 0,
+                  iptu: 0,
+                  comissao: 0,
+                  despesas: 0,
+                  financiamento: 0
+                };
+
+                existing.receita = Number((existing.receita + (idxReceita >= 0 ? parseBrCurrency(row[idxReceita]) : 0)).toFixed(2));
+                existing.condominio = Number((existing.condominio + (idxCond >= 0 ? parseBrCurrency(row[idxCond]) : 0)).toFixed(2));
+                existing.energia = Number((existing.energia + (idxEnergia >= 0 ? parseBrCurrency(row[idxEnergia]) : 0)).toFixed(2));
+                existing.lavanderia = Number((existing.lavanderia + (idxLav >= 0 ? parseBrCurrency(row[idxLav]) : 0)).toFixed(2));
+                existing.comissao = Number((existing.comissao + (idxComissao >= 0 ? parseBrCurrency(row[idxComissao]) : 0)).toFixed(2));
+                existing.despesas = Number((existing.despesas + (idxDespesas >= 0 ? parseBrCurrency(row[idxDespesas]) : 0)).toFixed(2));
+                existing.iptu = Number((existing.iptu + (idxIptu >= 0 ? parseBrCurrency(row[idxIptu]) : 0)).toFixed(2));
+                existing.financiamento = Number((existing.financiamento + (idxFinanc >= 0 ? parseBrCurrency(row[idxFinanc]) : 0)).toFixed(2));
+
+                aptRecordsMap.set(key, existing);
+              } else if (labelNorm.includes('lavand')) {
+                // Lavanderia compartilhada abaixo do Total -> rateia entre os 4 PJ principais
+                const rowVals = row.slice(1).map(parseBrCurrency).filter(v => v > 0);
+                const totalLav = rowVals.length > 0 ? rowVals[0] : 0;
+                if (totalLav > 0) {
+                  const pjShareUnits = ['Lacqua V - 125', 'Lacqua V - 237', 'Lacqua V - 246', 'Piazza - 912'];
+                  const basePart = Math.floor((totalLav / 4) * 100) / 100;
+                  const diff = Number((totalLav - basePart * 4).toFixed(2));
+                  pjShareUnits.forEach((uName, uIdx) => {
+                    const k = `${mNum}::${uName}`;
+                    const rec = aptRecordsMap.get(k) || { mes_num: mNum, unidade: uName, receita: 0, condominio: 0, energia: 0, lavanderia: 0, iptu: 0, comissao: 0, despesas: 0, financiamento: 0 };
+                    rec.lavanderia = Number((rec.lavanderia + basePart + (uIdx === 0 ? diff : 0)).toFixed(2));
+                    aptRecordsMap.set(k, rec);
+                  });
+                }
+              }
+            }
+          } else {
+            // Aba auxiliar / resumo geral (caso exista com impostos ou ajuste do Vitor)
+            const ws = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+            rows.forEach(row => {
+              if (!row || row.length < 2) return;
+              const c0 = normalizeText(row[0]);
+              const mFound = monthNumberFromSheetName(c0);
+              if (mFound >= 1 && mFound <= 11) {
+                // Procura colunas se houver cabeçalho na aba resumo
+                const headerRow = rows.find(r => r.some(x => normalizeText(x).includes('imposto') || normalizeText(x).includes('das') || normalizeText(x).includes('vitor')));
+                if (headerRow) {
+                  const hNorm = headerRow.map(x => normalizeText(x));
+                  const iImp = hNorm.findIndex(x => x.includes('imposto') || x.includes('das') || x.includes('darf'));
+                  const iVit = hNorm.findIndex(x => x.includes('vitor') || x.includes('ajuste') || x.includes('socio'));
+                  if (iImp >= 0 && parseBrCurrency(row[iImp]) !== 0) {
+                    monthlySummary[mFound].imposto = Math.abs(parseBrCurrency(row[iImp]));
+                  }
+                  if (iVit >= 0 && parseBrCurrency(row[iVit]) !== 0) {
+                    monthlySummary[mFound].ajuste = parseBrCurrency(row[iVit]);
+                  }
+                }
+              }
+            });
+          }
+        });
+
+        const aptRecords = Array.from(aptRecordsMap.values()).filter(r =>
+          r.receita !== 0 || r.condominio !== 0 || r.energia !== 0 || r.lavanderia !== 0 ||
+          r.iptu !== 0 || r.comissao !== 0 || r.despesas !== 0 || r.financiamento !== 0
+        );
+
+        aptRecords.forEach(r => {
+          const s = monthlySummary[r.mes_num];
+          if (!s) return;
+          s.unitsCount += 1;
+          s.receita = Number((s.receita + r.receita).toFixed(2));
+          s.condominio = Number((s.condominio + r.condominio).toFixed(2));
+          s.energia = Number((s.energia + r.energia).toFixed(2));
+          s.lavanderia = Number((s.lavanderia + r.lavanderia).toFixed(2));
+          s.comissao = Number((s.comissao + r.comissao).toFixed(2));
+          s.despesas = Number((s.despesas + r.despesas).toFixed(2));
+          s.iptu = Number((s.iptu + r.iptu).toFixed(2));
+          s.financiamento = Number((s.financiamento + r.financiamento).toFixed(2));
+        });
+
+        return { aptRecords, monthlySummary };
+      }
+
+      function parseMovimentacaoLumineWorkbook(workbook) {
+        const sheetName = workbook.SheetNames.find(n => normalizeText(n).includes('extrato')) || workbook.SheetNames[0];
+        const ws = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+
+        let headerIdx = 0;
+        for (let i = 0; i < Math.min(15, rows.length); i++) {
+          const rNorm = rows[i].map(c => normalizeText(c));
+          if (rNorm.some(c => c === 'data') && rNorm.some(c => c.includes('valor'))) {
+            headerIdx = i;
+            break;
+          }
+        }
+
+        const headers = rows[headerIdx].map(c => normalizeText(c));
+        const idxData = headers.findIndex(h => h === 'data');
+        const idxTipo = headers.findIndex(h => h.includes('credito') || h.includes('debito'));
+        const idxValor = headers.findIndex(h => h === 'valor');
+        const idxDesc = headers.findIndex(h => h.includes('descri'));
+        const idxMsg = headers.findIndex(h => h.includes('mensagem'));
+        const idxId = headers.findIndex(h => h.includes('identificador'));
+        const idxComp = headers.findIndex(h => h.includes('compet'));
+        const idxAcresc = headers.findIndex(h => h.includes('acres'));
+        const idxUnid = headers.findIndex(h => h.includes('condominio') || h.includes('unidade'));
+        const idxPlano = headers.findIndex(h => h.includes('plano de contas') || h.includes('categorizacao conforme'));
+        const idxDoc = headers.findIndex(h => h.includes('documentos comprovat'));
+        const idxPgdas = headers.findIndex(h => h.includes('pgdas'));
+        const idxAnot = headers.findIndex(h => h.includes('anota'));
+        const idxGerencial = headers.findIndex(h => h.includes('categria da operacao') || h.includes('categoria da operacao'));
+
+        const ledgerEntries = [];
+        const vendorMemEntries = {};
+
+        for (let r = headerIdx + 1; r < rows.length; r++) {
+          const row = rows[r];
+          if (!row || row.every(c => c === '' || c === null || c === undefined)) continue;
+
+          const rawValor = parseBrCurrency(idxValor >= 0 ? row[idxValor] : 0);
+          if (!rawValor || rawValor === 0) continue;
+
+          const dataIso = parseExcelDateToISO(idxData >= 0 ? row[idxData] : '');
+          const tipoRaw = normalizeText(idxTipo >= 0 ? row[idxTipo] : '');
+          const isCredit = tipoRaw.includes('cred') || (!tipoRaw.includes('deb') && rawValor > 0);
+          const tipoLabel = isCredit ? 'Crédito (Entrada)' : 'Débito (Saída)';
+          const absValor = Math.abs(rawValor);
+
+          const descBase = String(idxDesc >= 0 ? row[idxDesc] : '').trim();
+          const msgExtra = String(idxMsg >= 0 ? row[idxMsg] : '').trim();
+          const descricao = descBase || msgExtra || 'Movimentação Extrato';
+          const fitidRaw = String(idxId >= 0 ? row[idxId] : '').trim();
+          const mes_num = parseCompetenciaMonth(idxComp >= 0 ? row[idxComp] : '', dataIso);
+          const acrescimo = idxAcresc >= 0 ? parseBrCurrency(row[idxAcresc]) : 0;
+
+          const rawUnid = String(idxUnid >= 0 ? row[idxUnid] : '').trim();
+          const unidade = canonicalUnitName(rawUnid) || (rawUnid || 'TODAS');
+
+          const plano_contas = String(idxPlano >= 0 ? row[idxPlano] : '').trim() ||
+            (isCredit ? 'Recebimento de Clientes (1.1.02.01.01)' : 'Despesas Gerais (3.2.03.01.21)');
+
+          let gerencial = String(idxGerencial >= 0 ? row[idxGerencial] : '').trim().toUpperCase();
+          if (!gerencial) {
+            const linked = getAutoLinkedClassification(plano_contas);
+            gerencial = linked ? linked.gerencial : (isCredit ? 'RECEITA' : 'OUTRAS DEPESAS');
+          }
+
+          const rfb = getRfbForGerencial(gerencial);
+          const pgdas = String(idxPgdas >= 0 ? row[idxPgdas] : '').trim() || (isCredit ? PGDAS_OPTIONS[0] : 'Não se aplica');
+          const documento = String(idxDoc >= 0 ? row[idxDoc] : '').trim() || (fitidRaw ? `ID #${fitidRaw}` : '');
+          const anotacoes = [msgExtra, String(idxAnot >= 0 ? row[idxAnot] : '').trim()].filter(Boolean).join(' • ');
+
+          const contaBancaria = normalizeText(descricao).includes('cora') ? 'LUMINE PJ (CORA)' : 'LUMINE PJ (BTG)';
+
+          ledgerEntries.push({
+            fitid: fitidRaw || `MOV2026-${String(r + 1).padStart(4, '0')}`,
+            data_movimento: dataIso,
+            mes_num,
+            conta: contaBancaria,
+            tipo: tipoLabel,
+            unidade,
+            plano_contas,
+            gerencial,
+            rfb,
+            pgdas,
+            competencia_tipo: isCredit ? 'Receita' : 'Despesa',
+            valor: absValor,
+            acrescimo,
+            documento,
+            descricao,
+            anotacoes,
+            ja_contabilizado_fechamento: true
+          });
+
+          const vKey = extractVendorKey(descricao);
+          if (vKey) {
+            vendorMemEntries[vKey] = {
+              chave_fornecedor: vKey,
+              unidade,
+              plano: plano_contas,
+              gerencial,
+              pgdas
+            };
+          }
+        }
+
+        return { ledgerEntries, vendorMemEntries };
+      }
+
+      function renderOfficialSyncPreview() {
+        const previewBox = document.getElementById('officialSyncPreviewBox');
+        if (!officialSyncDraft.caldasLoaded && !officialSyncDraft.movLoaded) {
+          previewBox.classList.add('hidden');
+          return;
+        }
+        previewBox.classList.remove('hidden');
+
+        const janSummary = officialSyncDraft.monthlySummary[1] || { receita: 0 };
+        let totalRev2026 = 0;
+        for (let m = 1; m <= 11; m++) {
+          totalRev2026 += Number((officialSyncDraft.monthlySummary[m] || {}).receita || 0);
+        }
+
+        document.getElementById('syncCheckJanRev').textContent = officialSyncDraft.caldasLoaded ? formatBRL(janSummary.receita) : 'Não carregada';
+        document.getElementById('syncCheckTotalRev').textContent = officialSyncDraft.caldasLoaded ? formatBRL(totalRev2026) : 'Não carregada';
+        document.getElementById('syncCheckAptRows').textContent = officialSyncDraft.caldasLoaded ? String(officialSyncDraft.aptRecords.length) : '0';
+        document.getElementById('syncCheckLedgerRows').textContent = officialSyncDraft.movLoaded ? String(officialSyncDraft.ledgerEntries.length) : '0';
+
+        const auditWrap = document.getElementById('syncMonthlyAuditWrap');
+        const auditBody = document.getElementById('syncMonthlyAuditBody');
+
+        if (officialSyncDraft.caldasLoaded) {
+          auditWrap.classList.remove('hidden');
+          let html = '';
+          for (let m = 1; m <= 11; m++) {
+            const s = officialSyncDraft.monthlySummary[m];
+            const condEne = Number((s.condominio + s.energia).toFixed(2));
+            const outrosOp = Number((s.comissao + s.despesas + s.iptu + s.lavanderia).toFixed(2));
+            html += `
+              <tr class="hover:bg-white/5">
+                <td class="py-2 px-3 font-bold text-white">${escapeHtml(MONTH_NAMES[m])}/2026</td>
+                <td class="py-2 px-3 text-center font-mono text-slate-300">${s.unitsCount}</td>
+                <td class="py-2 px-3 text-right money text-cyan-300 font-semibold">${formatBRL(s.receita)}</td>
+                <td class="py-2 px-3 text-right money text-slate-300">${formatBRL(condEne)}</td>
+                <td class="py-2 px-3 text-right money text-pink-300">${formatBRL(outrosOp)}</td>
+                <td class="py-2 px-3 text-right money text-sky-300">${formatBRL(s.financiamento)}</td>
+                <td class="py-2 px-3 text-right">
+                  <input type="number" step="0.01" data-sync-imp="${m}" value="${Number(s.imposto || 0).toFixed(2)}" class="glass-input money w-28 px-2 py-1 text-right text-xs text-amber-300" />
+                </td>
+                <td class="py-2 px-3 text-right">
+                  <input type="number" step="0.01" data-sync-aju="${m}" value="${Number(s.ajuste || 0).toFixed(2)}" class="glass-input money w-28 px-2 py-1 text-right text-xs text-violet-300" />
+                </td>
+              </tr>`;
+          }
+          auditBody.innerHTML = html;
+
+          auditBody.querySelectorAll('input[data-sync-imp]').forEach(inp => {
+            inp.addEventListener('input', e => {
+              const m = Number(e.target.getAttribute('data-sync-imp'));
+              officialSyncDraft.monthlySummary[m].imposto = parseFloat(e.target.value || '0') || 0;
+            });
+          });
+          auditBody.querySelectorAll('input[data-sync-aju]').forEach(inp => {
+            inp.addEventListener('input', e => {
+              const m = Number(e.target.getAttribute('data-sync-aju'));
+              officialSyncDraft.monthlySummary[m].ajuste = parseFloat(e.target.value || '0') || 0;
+            });
+          });
+        } else {
+          auditWrap.classList.add('hidden');
+        }
+      }
+
+      window.resetOfficialSyncPreview = function () {
+        officialSyncDraft = {
+          caldasLoaded: false,
+          movLoaded: false,
+          aptRecords: [],
+          monthlySummary: {},
+          ledgerEntries: [],
+          vendorMemEntries: {}
+        };
+        document.getElementById('caldas2026FileInput').value = '';
+        document.getElementById('movLumineFileInput').value = '';
+        document.getElementById('caldas2026FileBadge').innerHTML = 'Clique para selecionar <span class="font-mono text-amber-300">Caldas 2026.xlsx</span>';
+        document.getElementById('movLumineFileBadge').innerHTML = 'Clique para selecionar <span class="font-mono text-cyan-300">Movimentação Lumine.xlsx</span>';
+        document.getElementById('officialSyncPreviewBox').classList.add('hidden');
+      };
+
+      window.commitOfficialSheetsToSupabase = async function () {
+        if (!supabaseClient) return;
+        if (!officialSyncDraft.caldasLoaded && !officialSyncDraft.movLoaded) return;
+
+        const btn = document.getElementById('commitOfficialSheetsBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Gravando no Supabase...';
+
+        try {
+          // Garante que as 8 unidades canônicas existem no Supabase
+          await supabaseClient.from('unidades').upsert(CANONICAL_UNITS_SEED, { onConflict: 'nome' });
+
+          if (officialSyncDraft.caldasLoaded) {
+            // Limpa registros estimados de 2026 em registros_mensais_aptos e fechamentos_mensais
+            const { error: delAptErr } = await supabaseClient.from('registros_mensais_aptos').delete().eq('ano', 2026);
+            if (delAptErr) throw delAptErr;
+
+            const { error: delFechErr } = await supabaseClient.from('fechamentos_mensais').delete().eq('ano', 2026);
+            if (delFechErr) throw delFechErr;
+
+            const aptPayload = officialSyncDraft.aptRecords.map(r => ({
+              ano: 2026,
+              mes_num: r.mes_num,
+              unidade: r.unidade,
+              receita: r.receita,
+              condominio: r.condominio,
+              energia: r.energia,
+              lavanderia: r.lavanderia,
+              iptu: r.iptu,
+              comissao: r.comissao,
+              despesas: r.despesas,
+              financiamento: r.financiamento
+            }));
+
+            if (aptPayload.length > 0) {
+              const { error: insAptErr } = await supabaseClient.from('registros_mensais_aptos').insert(aptPayload);
+              if (insAptErr) throw insAptErr;
+            }
+
+            const fechPayload = [];
+            for (let m = 1; m <= 11; m++) {
+              const s = officialSyncDraft.monthlySummary[m] || { imposto: 0, ajuste: 0 };
+              fechPayload.push({
+                ano: 2026,
+                mes_num: m,
+                imposto_das_daf: Number(s.imposto || 0),
+                ajuste_irmao_vitor: Number(s.ajuste || 0)
+              });
+            }
+            const { error: insFechErr } = await supabaseClient.from('fechamentos_mensais').insert(fechPayload);
+            if (insFechErr) throw insFechErr;
+          }
+
+          if (officialSyncDraft.movLoaded) {
+            // Limpa lançamentos anteriores e insere em lotes de 100
+            const { error: delLancErr } = await supabaseClient.from('lancamentos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (delLancErr) throw delLancErr;
+
+            const batchSize = 100;
+            for (let i = 0; i < officialSyncDraft.ledgerEntries.length; i += batchSize) {
+              const chunk = officialSyncDraft.ledgerEntries.slice(i, i + batchSize);
+              const { error: insLancErr } = await supabaseClient.from('lancamentos').insert(chunk);
+              if (insLancErr) throw insLancErr;
+            }
+
+            const memList = Object.values(officialSyncDraft.vendorMemEntries);
+            if (memList.length > 0) {
+              await supabaseClient.from('memoria_fornecedores').upsert(memList, { onConflict: 'chave_fornecedor' });
+            }
+          }
+
+          await loadAllDataFromSupabase();
+          initFormComboboxes();
+          refreshAllViews();
+          resetOfficialSyncPreview();
+          showToast('Base 100% Sincronizada!', 'Dados reais gravados no Supabase com sucesso.', 'emerald');
+        } catch (err) {
+          showToast('Erro ao Gravar no Supabase', err.message || 'Falha na gravação em lote.', 'rose');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '🚀 Substituir no Supabase Agora (100% Real)';
+        }
+      };
+
+      /* ========================================================================
+         COMBOBOX INTELIGENTE (SUBSTRING + SEM ACENTO + TECLADO)
+         ======================================================================== */
       function highlightMatch(label, rawQuery) {
         const text = String(label || '');
         const qNorm = normalizeText(rawQuery);
@@ -1746,7 +2399,7 @@
         if (p.includes('energia')) return { gerencial: 'ENERGIA', pgdas: 'Não se aplica', compTipo: 'Despesa' };
         if (p.includes('alugueis e condominios') || p.includes('condominio')) return { gerencial: 'CONDOMÍNIO', pgdas: 'Não se aplica', compTipo: 'Despesa' };
         if (p.includes('recebimento de clientes') || p.includes('adiantamento de clientes')) return { gerencial: 'HOSPEDAGEM DESC. COMISSÃO', pgdas: PGDAS_OPTIONS[0], compTipo: 'Receita' };
-        if (p.includes('rendimentos de aplicacoes') || p.includes('outras receitas')) return { gerencial: 'RECEITA', pgdas: 'Não se aplica', compTipo: 'Receita' };
+        if (p.includes('rendimentos de aplicacoes') || p.includes('recebimento de repasse') || p.includes('outras receitas')) return { gerencial: 'RECEITA', pgdas: 'Não se aplica', compTipo: 'Receita' };
         if (p.includes('simples nacional') || p.includes('darf') || p.includes('inss') || p.includes('fgts') || p.includes('impostos e taxas federais')) return { gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
         if (p.includes('iptu') || p.includes('alvara') || p.includes('impostos e taxas municipais')) return { gerencial: 'IMPOSTOS E TAXAS MUNICIPAIS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
         if (p.includes('distribuicao de lucros')) return { gerencial: 'DIVIDENDOS', pgdas: 'Não se aplica', compTipo: 'Despesa' };
@@ -1759,6 +2412,7 @@
           .replace(/^transferencia pix do arrendamento.*$/, 'arrendamento cpf titular')
           .replace(/^pix enviado para\s+/, '')
           .replace(/^transf pix recebida\s*-\s*/, '')
+          .replace(/^pix recebido de\s+/, '')
           .replace(/\(pedido[^)]*\)/g, '')
           .replace(/\(comp\.?[^)]*\)/g, '')
           .replace(/[^a-z0-9\s]/g, ' ')
@@ -1873,7 +2527,7 @@
       }
 
       /* ========================================================================
-         FORMATAÇÃO & TOASTS (COM ESCAPEHTML ANTI-XSS)
+         FORMATAÇÃO & TOASTS
          ======================================================================== */
       function formatBRL(val) {
         return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -2087,7 +2741,7 @@
       }
 
       /* ========================================================================
-         APARTAMENTOS (100% ESCAPED)
+         APARTAMENTOS
          ======================================================================== */
       function renderApartments() {
         const mFilter = state.monthFilter;
@@ -2220,7 +2874,7 @@
 
         createNeonCombobox('cb-entryAccount', {
           id: 'entryAccount', value: 'LUMINE PJ (BTG)',
-          groups: [{ label: 'Contas Bancárias', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }]
+          groups: [{ label: 'Contas Bancárias', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'LUMINE PJ (CORA)', label: 'LUMINE PJ (CORA)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }]
         });
 
         createNeonCombobox('cb-entryType', {
@@ -2252,7 +2906,7 @@
 
         createNeonCombobox('cb-ledgerAccountFilter', {
           id: 'ledgerAccountFilter', value: 'all', compact: true,
-          groups: [{ label: 'Filtrar Conta', items: [{ value: 'all', label: 'Todas as Contas' }, { value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }],
+          groups: [{ label: 'Filtrar Conta', items: [{ value: 'all', label: 'Todas as Contas' }, { value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'LUMINE PJ (CORA)', label: 'LUMINE PJ (CORA)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }],
           onChange: val => { state.ledgerAccountFilter = val; renderCustomLedger(); }
         });
 
@@ -2313,7 +2967,7 @@
       };
 
       /* ========================================================================
-         FILA DE CONCILIAÇÃO RÁPIDA (CLOUD + 100% ESCAPED)
+         FILA DE CONCILIAÇÃO RÁPIDA
          ======================================================================== */
       function renderPendingQueue() {
         const container = document.getElementById('pendingQueueContainer');
@@ -2432,7 +3086,7 @@
       };
 
       /* ========================================================================
-         LIVRO-RAZÃO + EDIÇÃO (✏️) + EXCLUSÃO (🗑️) (100% ESCAPED)
+         LIVRO-RAZÃO + EDIÇÃO (✏️) + EXCLUSÃO (🗑️)
          ======================================================================== */
       function renderCustomLedger() {
         const tbody = document.getElementById('customEntriesBody');
@@ -2448,7 +3102,7 @@
           tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Nenhum lançamento classificado neste filtro.</td></tr>`;
           return;
         }
-        tbody.innerHTML = filtered.map(item => {
+        tbody.innerHTML = filtered.slice(0, 400).map(item => {
           const isCredit = item.tipo.includes('Crédito');
           const safeId = escapeHtml(item.id);
           return `
@@ -2492,7 +3146,7 @@
 
         createNeonCombobox('cb-editAccount', {
           id: 'editAccount', value: item.conta,
-          groups: [{ label: 'Contas', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }]
+          groups: [{ label: 'Contas', items: [{ value: 'LUMINE PJ (BTG)', label: 'LUMINE PJ (BTG)' }, { value: 'LUMINE PJ (CORA)', label: 'LUMINE PJ (CORA)' }, { value: 'CARTEIRA PF (Conta Física)', label: 'CARTEIRA PF (Conta Física)' }] }]
         });
 
         createNeonCombobox('cb-editType', {
@@ -2579,7 +3233,7 @@
       };
 
       /* ========================================================================
-         PARSER .OFX & DEDUPLICAÇÃO (100% ESCAPED + ZERO DADOS REAIS)
+         PARSER .OFX & DEDUPLICAÇÃO
          ======================================================================== */
       function extractOfxTag(blk, tag) {
         const m = blk.match(new RegExp(`<${tag}>([^<\\r\\n]+)`, 'i'));
@@ -2725,8 +3379,8 @@
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.monthlyRecords.map(r => ({
           Mes_Num: r.mes_num, Mes: MONTH_NAMES[r.mes_num], Unidade: r.unidade, Regime: getUnitScope(r.unidade),
           Receita: Number(r.receita || 0), Condominio: Number(r.condominio || 0), Energia: Number(r.energia || 0),
-          Lavanderia: Number(r.lavanderia || 0), IPTU: Number(r.iptu || 0), Comissao: Number(r.comissao || 0),
-          Outras_Despesas_Arrendamento: Number(r.despesas || 0), Financiamento_PF: Number(r.financiamento || 0)
+          Lavanderia: Number(r.lavanderia || 0), Comissao: Number(r.comissao || 0), Despesas: Number(r.despesas || 0),
+          IPTU: Number(r.iptu || 0), Financiamento_PF: Number(r.financiamento || 0)
         }))), 'Resumo_Aptos_2026');
 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.customLedger.length ? state.customLedger.map(l => ({
@@ -2746,7 +3400,7 @@
       };
 
       /* ========================================================================
-         ABA 4 & ABA 5 (100% ESCAPED & DADOS FISCAIS DO SUPABASE)
+         ABA 4 & ABA 5
          ======================================================================== */
       function renderCatalogTab() {
         const filter = state.catalogFilter, q = normalizeText(state.catalogSearch || '');
@@ -2870,13 +3524,9 @@
             if (error || !data.user) {
               const rawMsg = error ? error.message : 'Erro desconhecido';
               let friendly = `Erro Supabase: ${rawMsg}`;
-              if (rawMsg.includes('Invalid login credentials')) {
-                friendly = 'E-mail ou senha incorretos no Supabase.';
-              } else if (rawMsg.includes('Email not confirmed')) {
-                friendly = 'E-mail ainda não confirmado no painel Authentication → Users.';
-              } else if (rawMsg.includes('Failed to fetch')) {
-                friendly = 'Não foi possível alcançar o servidor Supabase. Confira a URL na engrenagem ⚙️.';
-              }
+              if (rawMsg.includes('Invalid login credentials')) friendly = 'E-mail ou senha incorretos no Supabase.';
+              else if (rawMsg.includes('Email not confirmed')) friendly = 'E-mail ainda não confirmado no painel Authentication → Users.';
+              else if (rawMsg.includes('Failed to fetch')) friendly = 'Não foi possível alcançar o servidor Supabase. Confira a URL na engrenagem ⚙️.';
               errBox.textContent = friendly;
               errBox.classList.remove('hidden');
               return;
@@ -2901,11 +3551,7 @@
           try {
             const { data: challengeData, error: chErr } = await supabaseClient.auth.mfa.challenge({ factorId: pendingMfaFactorId });
             if (chErr) throw chErr;
-            const { error: verErr } = await supabaseClient.auth.mfa.verify({
-              factorId: pendingMfaFactorId,
-              challengeId: challengeData.id,
-              code
-            });
+            const { error: verErr } = await supabaseClient.auth.mfa.verify({ factorId: pendingMfaFactorId, challengeId: challengeData.id, code });
             if (verErr) throw verErr;
             const { data: userData } = await supabaseClient.auth.getUser();
             btn.disabled = false; btn.textContent = '✓ Validar Código 2FA & Acessar';
@@ -2924,11 +3570,7 @@
           try {
             const { data: challengeData, error: chErr } = await supabaseClient.auth.mfa.challenge({ factorId: enrollingMfaFactorId });
             if (chErr) throw chErr;
-            const { error: verErr } = await supabaseClient.auth.mfa.verify({
-              factorId: enrollingMfaFactorId,
-              challengeId: challengeData.id,
-              code
-            });
+            const { error: verErr } = await supabaseClient.auth.mfa.verify({ factorId: enrollingMfaFactorId, challengeId: challengeData.id, code });
             if (verErr) throw verErr;
             enrollingMfaFactorId = null;
             showToast('2FA Ativado com Sucesso!', 'A partir do próximo login, o código de 6 dígitos será exigido.', 'emerald');
@@ -2951,6 +3593,63 @@
           closeSecurityModal();
           showToast('Senha Atualizada!', 'Nova senha gravada no Supabase Auth.', 'emerald');
         });
+
+        // Uploads do Sincronizador Oficial de Planilhas Reais
+        const caldasInput = document.getElementById('caldas2026FileInput');
+        const movInput = document.getElementById('movLumineFileInput');
+
+        function handleCaldas2026File(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = ev => {
+            try {
+              const wb = XLSX.read(ev.target.result, { type: 'array' });
+              const parsed = parseCaldas2026Workbook(wb);
+              officialSyncDraft.caldasLoaded = true;
+              officialSyncDraft.aptRecords = parsed.aptRecords;
+              officialSyncDraft.monthlySummary = parsed.monthlySummary;
+              document.getElementById('caldas2026FileBadge').innerHTML = `<span class="text-emerald-300 font-bold">✓ ${escapeHtml(file.name)} (${parsed.aptRecords.length} linhas)</span>`;
+              renderOfficialSyncPreview();
+              showToast('Caldas 2026 Lida!', `${parsed.aptRecords.length} registros extraídos das abas mensais.`, 'emerald');
+            } catch (err) {
+              showToast('Erro ao Ler Caldas 2026', err.message, 'rose');
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }
+
+        function handleMovLumineFile(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = ev => {
+            try {
+              const wb = XLSX.read(ev.target.result, { type: 'array' });
+              const parsed = parseMovimentacaoLumineWorkbook(wb);
+              officialSyncDraft.movLoaded = true;
+              officialSyncDraft.ledgerEntries = parsed.ledgerEntries;
+              officialSyncDraft.vendorMemEntries = parsed.vendorMemEntries;
+              document.getElementById('movLumineFileBadge').innerHTML = `<span class="text-emerald-300 font-bold">✓ ${escapeHtml(file.name)} (${parsed.ledgerEntries.length} lançamentos)</span>`;
+              renderOfficialSyncPreview();
+              showToast('Movimentação Lida!', `${parsed.ledgerEntries.length} lançamentos extraídos nos 4 eixos.`, 'cyan');
+            } catch (err) {
+              showToast('Erro ao Ler Movimentação', err.message, 'rose');
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }
+
+        caldasInput.addEventListener('change', e => handleCaldas2026File(e.target.files[0]));
+        movInput.addEventListener('change', e => handleMovLumineFile(e.target.files[0]));
+
+        const caldasDz = document.getElementById('caldas2026Dropzone');
+        caldasDz.addEventListener('dragover', e => { e.preventDefault(); caldasDz.classList.add('drag-over'); });
+        caldasDz.addEventListener('dragleave', () => caldasDz.classList.remove('drag-over'));
+        caldasDz.addEventListener('drop', e => { e.preventDefault(); caldasDz.classList.remove('drag-over'); handleCaldas2026File(e.dataTransfer.files[0]); });
+
+        const movDz = document.getElementById('movLumineDropzone');
+        movDz.addEventListener('dragover', e => { e.preventDefault(); movDz.classList.add('drag-over'); });
+        movDz.addEventListener('dragleave', () => movDz.classList.remove('drag-over'));
+        movDz.addEventListener('drop', e => { e.preventDefault(); movDz.classList.remove('drag-over'); handleMovLumineFile(e.dataTransfer.files[0]); });
 
         document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
         document.getElementById('monthFilter').addEventListener('change', e => { state.monthFilter = e.target.value; refreshAllViews(); });
