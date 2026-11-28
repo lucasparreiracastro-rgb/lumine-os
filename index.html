@@ -225,7 +225,7 @@
         <p class="text-xs text-slate-400">Ambiente Protegido • Gestão Imobiliária PJ &amp; PF (Caldas Novas)</p>
       </div>
 
-      <!-- MODO PRIMEIRO ACESSO (Exibido automaticamente enquanto não houver senha cadastrada) -->
+      <!-- MODO PRIMEIRO ACESSO -->
       <div id="firstSetupSection" class="space-y-4">
         <div class="p-3.5 rounded-xl bg-emerald-950/35 border border-emerald-400/35 text-xs space-y-1">
           <div class="font-bold text-emerald-300">🛡️ Primeiro Acesso — Crie Sua Senha Mestra</div>
@@ -266,7 +266,7 @@
         </form>
       </div>
 
-      <!-- FORMULÁRIO DE LOGIN (Exibido após a senha mestra ser criada) -->
+      <!-- FORMULÁRIO DE LOGIN -->
       <form id="loginForm" class="hidden space-y-4">
         <div>
           <label for="loginEmail" class="block text-xs font-semibold text-slate-300 mb-1.5">E-mail Autorizado</label>
@@ -326,7 +326,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h4 class="text-sm font-bold text-emerald-300">Cópia de Segurança Completa (Planilha .XLSX)</h4>
-            <p class="text-xs text-slate-300 mt-0.5">Exporta 4 abas: Resumo Aptos 2026, Lançamentos 4 Eixos, Fechamentos Irmão/DAS e Plano de Contas.</p>
+            <p class="text-xs text-slate-300 mt-0.5">Exporta 4 abas: Resumo Aptos 2026, Lançamentos 4 Eixos, Fechamentos Irmão/DAS+DARF e Plano de Contas.</p>
           </div>
           <button type="button" onclick="exportFullExcelBackup()" class="btn-neon-emerald px-4 py-2.5 rounded-xl text-xs font-extrabold whitespace-nowrap">
             📥 Baixar Backup (.xlsx)
@@ -396,7 +396,7 @@
     <div class="liquid-glass glow-magenta max-w-md w-full p-6 space-y-5">
       <div>
         <h3 class="text-base font-bold text-white">⚠️ Restaurar Base Original?</h3>
-        <p class="text-xs text-slate-400 mt-1">Os lançamentos manuais e alterações locais serão substituídos pelos valores auditados de Caldas 2026 e da Aba 4.</p>
+        <p class="text-xs text-slate-400 mt-1">Os lançamentos manuais e alterações locais serão substituídos pelos valores auditados de Caldas 2026 (incluindo DAS + DARF 0385) e da Aba 4.</p>
       </div>
       <div class="flex items-center justify-end gap-3 pt-2">
         <button type="button" id="cancelResetBtn" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-white/10">Cancelar</button>
@@ -469,7 +469,7 @@
           </button>
           <button data-tab="tab-catalog" class="tab-btn flex items-center gap-1.5 px-3 py-2 text-xs font-semibold whitespace-nowrap">
             <span>4. Plano de Contas (Aba 4)</span>
-            <span id="catalogCountBadge" class="px-1.5 py-0.5 text-[10px] font-mono rounded-md bg-violet-500/20 text-violet-300 border border-violet-400/35">117</span>
+            <span id="catalogCountBadge" class="px-1.5 py-0.5 text-[10px] font-mono rounded-md bg-violet-500/20 text-violet-300 border border-violet-400/35">118</span>
           </button>
           <button data-tab="tab-sql" class="tab-btn flex items-center gap-1.5 px-3 py-2 text-xs font-semibold whitespace-nowrap">
             <span>5. Fiscal, Auth &amp; Supabase SQL</span>
@@ -540,7 +540,7 @@
             <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Despesas Operac.</span>
             <div class="mt-3">
               <div id="kpiDespesasOp" class="money text-xl sm:text-2xl font-bold text-pink-300">R$ 0,00</div>
-              <p class="text-[11px] text-slate-400 mt-1">Cond., Energia, Lavand., IPTU</p>
+              <p class="text-[11px] text-slate-400 mt-1">Cond., Energia, Lavand., IPTU, Arrend.</p>
             </div>
           </div>
 
@@ -553,10 +553,10 @@
           </div>
 
           <div class="liquid-glass liquid-glass-hover glow-violet p-5 flex flex-col justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Impostos + Irmão</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Impostos (DAS+DARF) + Irmão</span>
             <div class="mt-3">
               <div id="kpiImpostosAjuste" class="money text-xl sm:text-2xl font-bold text-violet-300">R$ 0,00</div>
-              <p id="kpiImpostosSub" class="text-[11px] text-slate-400 mt-1">DAS: R$ 0,00 | Irmão: R$ 0,00</p>
+              <p id="kpiImpostosSub" class="text-[11px] text-slate-400 mt-1">DAS+DARF: R$ 0,00 | Irmão: R$ 0,00</p>
             </div>
           </div>
 
@@ -567,7 +567,7 @@
             </div>
             <div class="mt-3">
               <div id="kpiLucroFinal" class="money text-xl sm:text-2xl font-extrabold text-white">R$ 0,00</div>
-              <p class="text-[11px] text-cyan-200/80 mt-1">Livre após taxas, DAS &amp; equalização</p>
+              <p class="text-[11px] text-cyan-200/80 mt-1">Livre após taxas, DAS+DARF &amp; equalização</p>
             </div>
           </div>
         </div>
@@ -631,7 +631,7 @@
               <h3 class="text-base font-bold text-white">Fechamento Consolidado por Competência (2026)</h3>
               <p class="text-xs text-slate-400">Clique em qualquer linha para filtrar o painel naquele mês</p>
             </div>
-            <span class="text-[11px] font-mono text-cyan-300 bg-cyan-400/10 border border-cyan-400/25 px-2.5 py-1 rounded-lg">Fórmulas 100% Auditadas</span>
+            <span class="text-[11px] font-mono text-cyan-300 bg-cyan-400/10 border border-cyan-400/25 px-2.5 py-1 rounded-lg">DAS + DARF 0385 Incluídos</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -641,7 +641,7 @@
                   <th class="py-3 px-3 text-right">Receita Bruta</th>
                   <th class="py-3 px-3 text-right">Desp. Operac.</th>
                   <th class="py-3 px-3 text-right">Financ. PF</th>
-                  <th class="py-3 px-3 text-right">Impostos (DAS)</th>
+                  <th class="py-3 px-3 text-right">Impostos (DAS+DARF)</th>
                   <th class="py-3 px-3 text-right">Ajuste Irmão</th>
                   <th class="py-3 px-3 text-right">Lucro Lucas</th>
                 </tr>
@@ -680,7 +680,7 @@
                   <th class="py-3 px-3 text-right">Condomínio</th>
                   <th class="py-3 px-3 text-right">Energia</th>
                   <th class="py-3 px-3 text-right">Lavanderia</th>
-                  <th class="py-3 px-3 text-right">IPTU / Outros</th>
+                  <th class="py-3 px-3 text-right">IPTU / Arrend. / Outros</th>
                   <th class="py-3 px-3 text-right">Financ. PF</th>
                   <th class="py-3 px-3 text-right">Resultado</th>
                   <th class="py-3 px-3 text-right">Margem</th>
@@ -699,12 +699,25 @@
       <div id="tab-entries" class="tab-panel hidden space-y-6">
 
         <section class="liquid-glass glow-cyan p-5 sm:p-6">
-          <div class="mb-5">
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-400/15 text-cyan-300 border border-cyan-400/35">
-              Espelho Oficial • Extrato + Aba 4 CATEGORIZAÇÃO
-            </span>
-            <h2 class="text-lg font-bold text-white mt-1">Novo Lançamento com Classificação Completa em 4 Eixos</h2>
-            <p class="text-xs text-slate-400">Suporta <strong class="text-violet-300">LUMINE PJ (BTG)</strong> e lançamentos da <strong class="text-sky-300">LUCAS PF (Conta Física)</strong>.</p>
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-400/15 text-cyan-300 border border-cyan-400/35">
+                Espelho Oficial • Extrato + Aba 4 CATEGORIZAÇÃO + Contajá
+              </span>
+              <h2 class="text-lg font-bold text-white mt-1">Novo Lançamento com Classificação Completa em 4 Eixos</h2>
+              <p class="text-xs text-slate-400">Suporta <strong class="text-violet-300">LUMINE PJ (BTG)</strong> e lançamentos da <strong class="text-sky-300">LUCAS PF (Conta Física)</strong>.</p>
+            </div>
+
+            <button type="button" onclick="applyArrendamentoPreset()" class="btn-neon-violet px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap self-start lg:self-auto" title="Preenche automaticamente Contratos a Pagar (2.1.05.01.09) para PIX de Arrendamento PJ -> CPF Lucas">
+              ⚡ Preencher Arrendamento PJ → CPF Lucas (2.1.05.01.09)
+            </button>
+          </div>
+
+          <div id="contajaRuleBanner" class="hidden mb-4 p-3.5 rounded-xl bg-amber-950/35 border border-amber-400/40 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="font-bold text-amber-300">📌 Regra Contajá (Código 2.1.05.01.09):</span>
+              <span class="text-slate-200"> Transferência PIX do Arrendamento da Lumine PJ para o CPF do Lucas — classificar sempre como <strong>Contratos a Pagar (2.1.05.01.09)</strong> (nunca usar Distribuição de Lucros).</span>
+            </div>
           </div>
 
           <form id="manualEntryForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
@@ -741,7 +754,7 @@
 
             <div class="lg:col-span-3">
               <label for="entryDate" class="block text-xs font-semibold text-slate-300 mb-1.5">Data do Movimento *</label>
-              <input type="date" id="entryDate" required value="2026-11-26" class="glass-input w-full px-3.5 py-2.5 text-sm" />
+              <input type="date" id="entryDate" required value="2026-11-27" class="glass-input w-full px-3.5 py-2.5 text-sm" />
             </div>
 
             <div class="sm:col-span-2 lg:col-span-6">
@@ -788,7 +801,7 @@
 
             <div class="lg:col-span-3">
               <label for="entryDocumento" class="block text-xs font-semibold text-slate-300 mb-1.5">Documento Comprobatório</label>
-              <input type="text" id="entryDocumento" placeholder="Ex: NFSe 124 / Boleto / Pix" class="glass-input w-full px-3.5 py-2.5 text-sm" />
+              <input type="text" id="entryDocumento" placeholder="Ex: Contrato Arrendamento / PIX" class="glass-input w-full px-3.5 py-2.5 text-sm" />
             </div>
 
             <div class="lg:col-span-3">
@@ -810,7 +823,7 @@
 
             <div class="sm:col-span-2 lg:col-span-6">
               <label for="entryDescription" class="block text-xs font-semibold text-slate-300 mb-1.5">Descrição / Histórico *</label>
-              <input type="text" id="entryDescription" required placeholder="Ex: Parcela Financiamento Caixa Piazza 416 / Repasse Acolher Turismo" class="glass-input w-full px-3.5 py-2.5 text-sm" />
+              <input type="text" id="entryDescription" required placeholder="Ex: Transferência PIX do Arrendamento para o CPF do Lucas" class="glass-input w-full px-3.5 py-2.5 text-sm" />
             </div>
 
             <div class="lg:col-span-4">
@@ -832,7 +845,7 @@
                 <span>Fila de Conciliação Rápida (Extrato BTG &amp; OFX Importados)</span>
                 <span id="pendingCountText" class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-amber-500/20 text-amber-300 border border-amber-400/35">9 pendentes</span>
               </h3>
-              <p class="text-xs text-slate-400">Revise ou ajuste a Unidade, o Plano de Contas e a Classificação Gerencial antes de confirmar.</p>
+              <p class="text-xs text-slate-400">Os 5 PIX de Arrendamento para Lucas Parreira já estão pré-configurados como <strong class="text-cyan-300">Contratos a Pagar (2.1.05.01.09)</strong>.</p>
             </div>
           </div>
           <div id="pendingQueueContainer" class="space-y-3"></div>
@@ -846,7 +859,7 @@
                 Open Financial Exchange (.OFX) + Excel/CSV • Deduplicação FITID
               </span>
               <h3 class="text-base sm:text-lg font-bold text-white mt-1">Importador de Extrato Bancário (.OFX) e Planilhas (.XLSX / .CSV)</h3>
-              <p class="text-xs text-slate-400">Arraste o extrato <strong class="text-cyan-300">.ofx</strong> do BTG Pactual ou outro banco. Lançamentos repetidos são bloqueados automaticamente pelo <code class="text-cyan-300">&lt;FITID&gt;</code>.</p>
+              <p class="text-xs text-slate-400">Arraste o extrato <strong class="text-cyan-300">.ofx</strong> do BTG Pactual ou outro banco. PIX de Arrendamento para o CPF do Lucas já entra automaticamente como <code class="text-cyan-300">Contratos a Pagar (2.1.05.01.09)</code>.</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -980,10 +993,10 @@
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-violet-500/20 text-violet-300 border border-violet-400/35">
-                Espelho 100% Fiel • Aba 4 "CATEGORIZAÇÃO"
+                Espelho 100% Fiel • Aba 4 "CATEGORIZAÇÃO" + Contajá
               </span>
               <h2 class="text-lg font-bold text-white mt-1">Catálogo Completo do Plano de Contas, Matriz RFB &amp; PGDAS-D</h2>
-              <p class="text-xs text-slate-400">Todas as 28 Classificações Gerenciais × RFB, 10 grupos de Entradas, 9 grupos de Saídas e regras PGDAS-D.</p>
+              <p class="text-xs text-slate-400">Inclui <strong class="text-cyan-300">Contratos a Pagar (2.1.05.01.09)</strong> nas Despesas Operacionais para o arrendamento PJ → PF.</p>
             </div>
             <div class="w-full lg:w-72">
               <input type="text" id="catalogSearchInput" placeholder="Pesquisar conta, código ou RFB..." class="glass-input w-full px-3.5 py-2 text-xs" />
@@ -1050,18 +1063,18 @@
             <div>
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-violet-500/20 text-violet-300 border border-violet-400/35">Apuração Tributária • Lumine PJ</span>
               <h2 class="text-lg font-bold text-white mt-1">Simples Nacional — Anexo III (Faixa II • Alíquota Efetiva 7,7226%)</h2>
-              <p class="text-xs text-slate-400">Rateio proporcional da guia DAS entre as unidades PJ conforme o faturamento de cada apartamento.</p>
+              <p class="text-xs text-slate-400">Rateio proporcional das guias DAS + DARF (0385) entre as unidades PJ conforme o faturamento de cada apartamento.</p>
             </div>
 
             <div class="flex items-center gap-2">
               <label for="taxMonthSelect" class="text-xs text-slate-400">Base de Rateio:</label>
               <select id="taxMonthSelect" class="glass-input px-3 py-2 text-xs font-semibold">
-                <option value="11" selected>Novembro / 2026 (DAS R$ 1.585,14)</option>
-                <option value="10">Outubro / 2026 (DAS R$ 1.763,45)</option>
-                <option value="9">Setembro / 2026 (DAS R$ 1.539,02)</option>
-                <option value="8">Agosto / 2026 (DAS R$ 3.108,40)</option>
-                <option value="7">Julho / 2026 (DAS R$ 2.529,44)</option>
-                <option value="all">Acumulado Jan–Nov/2026</option>
+                <option value="11" selected>Novembro / 2026 (DAS+DARF R$ 1.763,45)</option>
+                <option value="10">Outubro / 2026 (DAS+DARF R$ 1.763,45)</option>
+                <option value="9">Setembro / 2026 (DAS+DARF R$ 1.539,02)</option>
+                <option value="8">Agosto / 2026 (DAS+DARF R$ 3.108,40)</option>
+                <option value="7">Julho / 2026 (DAS+DARF R$ 2.529,44)</option>
+                <option value="all">Acumulado Jan–Nov/2026 (R$ 22.391,16)</option>
               </select>
             </div>
           </div>
@@ -1096,7 +1109,7 @@
                   <th class="py-3 px-3">Unidade Lumine PJ</th>
                   <th class="py-3 px-3 text-right">Faturamento PJ no Período</th>
                   <th class="py-3 px-3 text-right">Participação (%)</th>
-                  <th class="py-3 px-3 text-right">DAS Rateado (7,7226% / Guia)</th>
+                  <th class="py-3 px-3 text-right">DAS+DARF Rateado</th>
                 </tr>
               </thead>
               <tbody id="dasRateioBody" class="divide-y divide-white/5 text-xs sm:text-sm"></tbody>
@@ -1128,7 +1141,7 @@
     (function () {
       'use strict';
 
-      const STORAGE_KEY = 'lumine_caldas_os_v3_ofx_auth';
+      const STORAGE_KEY = 'lumine_caldas_os_v5_contratos_pagar';
       const AUTH_USERS_KEY = 'lumine_auth_users';
       const AUTH_SESSION_KEY = 'lumine_auth_session';
 
@@ -1153,7 +1166,34 @@
 
       const INITIAL_PLANO_SAIDAS = [
         { grupo: 'CLIENTES', contas: ['Estorno Recebimento de Clientes (1.1.02.01.01)'] },
-        { grupo: 'DESPESAS OPERACIONAIS', contas: ['Serviços de Terceiros (3.2.03.01.09)', 'Água e Esgoto (3.2.03.01.03)', 'Telefone e Internet (3.2.03.01.04)', 'Energia Elétrica (3.2.03.01.05)', 'Alugueis e Condomínios (3.2.03.01.06)', 'Limpeza e Conservação (3.2.03.01.24)', 'Cartão de Crédito (3.2.03.01.12)', 'Cartório e Correio (3.2.03.01.13)', 'Despesas com Viagens e Transportes (3.2.03.01.14)', 'Estacionamento (3.2.03.01.15)', 'Combustível (3.2.03.01.08)', 'Honorário Contábil a Pagar (2.1.05.01.01)', 'Honorários Advocatícios (3.2.03.01.16)', 'Manutenção e Reparo (3.2.03.01.17)', 'Material de Uso e Consumo (3.2.03.01.07)', 'Marketing, Propaganda e Publicidade (3.2.03.01.11)', 'Fretes e Carretos (3.2.03.01.18)', 'Seguros (3.2.03.01.10)', 'Programas de gestão e Software (3.2.03.01.19)', 'Cursos e Treinamentos (3.2.03.01.20)', 'Despesas Gerais (3.2.03.01.21)', 'Fornecedores Diversos (2.1.01.01.01)', 'Despesas administrativas (3.2.03.01.02)', 'Serviços de Intermediações (3.2.03.01.23)', 'Alvará Municipal (3.2.01.01.02)'] },
+        { grupo: 'DESPESAS OPERACIONAIS', contas: [
+          'Contratos a Pagar (2.1.05.01.09)',
+          'Alugueis e Condomínios (3.2.03.01.06)',
+          'Serviços de Terceiros (3.2.03.01.09)',
+          'Água e Esgoto (3.2.03.01.03)',
+          'Telefone e Internet (3.2.03.01.04)',
+          'Energia Elétrica (3.2.03.01.05)',
+          'Limpeza e Conservação (3.2.03.01.24)',
+          'Cartão de Crédito (3.2.03.01.12)',
+          'Cartório e Correio (3.2.03.01.13)',
+          'Despesas com Viagens e Transportes (3.2.03.01.14)',
+          'Estacionamento (3.2.03.01.15)',
+          'Combustível (3.2.03.01.08)',
+          'Honorário Contábil a Pagar (2.1.05.01.01)',
+          'Honorários Advocatícios (3.2.03.01.16)',
+          'Manutenção e Reparo (3.2.03.01.17)',
+          'Material de Uso e Consumo (3.2.03.01.07)',
+          'Marketing, Propaganda e Publicidade (3.2.03.01.11)',
+          'Fretes e Carretos (3.2.03.01.18)',
+          'Seguros (3.2.03.01.10)',
+          'Programas de gestão e Software (3.2.03.01.19)',
+          'Cursos e Treinamentos (3.2.03.01.20)',
+          'Despesas Gerais (3.2.03.01.21)',
+          'Fornecedores Diversos (2.1.01.01.01)',
+          'Despesas administrativas (3.2.03.01.02)',
+          'Serviços de Intermediações (3.2.03.01.23)',
+          'Alvará Municipal (3.2.01.01.02)'
+        ] },
         { grupo: 'OUTRAS SAÍDAS', contas: ['Outras depesas (3.2.03.01.21)'] },
         { grupo: 'CAPITAL SOCIAL', contas: ['Devolução de AFAC - Adiantamento para Futuro Aumento de Capital) (Capital Social 2.1.05.04.01)'] },
         { grupo: 'EMPRÉSTIMO E FINANCIAMENTO', contas: ['Pagamento de Empréstimo de Terceiros (2.1.03.01.03)', 'Pagamento de Empréstimo dos Sócios (2.1.03.01.01)', 'Pagamento de Empréstimos/Financiamentos Bancários (2.1.03.01.02)', 'Empréstimo Concedido a Terceiros (1.1.04.01.05)', 'Empréstimo Concedido aos Sócios (1.1.04.01.02)'] },
@@ -1286,6 +1326,7 @@
         { mes_num: 11, unidade: 'Piazza - 912', receita: 5871.16, condominio: 1945.23, energia: 600.85 }
       ];
 
+      // Impostos consolidados (DAS + DARF 0385): Novembro inclui R$ 1.585,14 (DAS) + R$ 178,31 (DARF 0385) = R$ 1.763,45
       const INITIAL_CLOSINGS = {
         1: { ajuste: -1845.20, imposto: 1948.12 },
         2: { ajuste: -1620.45, imposto: 1701.35 },
@@ -1297,7 +1338,7 @@
         8: { ajuste: -1980.40, imposto: 3108.40 },
         9: { ajuste: -1385.90, imposto: 1539.02 },
         10: { ajuste: -1512.30, imposto: 1763.45 },
-        11: { ajuste: 0.00, imposto: 1585.14 }
+        11: { ajuste: 0.00, imposto: 1763.45 }
       };
 
       const KNOWN_LUMINE_FITIDS = [
@@ -1307,12 +1348,12 @@
 
       const INITIAL_PENDING_NOV = [
         { id: 'pend-1', fitid: '5286796261', data: '2026-11-16', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Santana Indústria (Pedido 2781)', valor: 2562.76, sugUnidade: 'TODAS', sugPlano: 'Fornecedores Diversos (2.1.01.01.01)', sugGerencial: 'OUTRAS DEPESAS', sugPgdas: 'Não se aplica' },
-        { id: 'pend-2', fitid: '5298408906', data: '2026-11-19', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'DARF Simples Nacional (Cód. 0385)', valor: 178.31, sugUnidade: 'TODAS', sugPlano: 'Simples Nacional (DAS) (2.1.04.01.01)', sugGerencial: 'IMPOSTOS FEDERAIS', sugPgdas: 'Não se aplica', jaContabilizadoNoFechamento: true },
-        { id: 'pend-3', fitid: '5298743634', data: '2026-11-19', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Pix Arrendamento Lucas Parreira Castro (Comp. 03/26)', valor: 960.00, sugUnidade: 'Lacqua V - 125', sugPlano: 'Alugueis e Condomínios (3.2.03.01.06)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
-        { id: 'pend-4', fitid: '5302760621', data: '2026-11-20', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Pix Arrendamento Lucas Parreira Castro (Comp. 04/26)', valor: 960.00, sugUnidade: 'Lacqua V - 237', sugPlano: 'Alugueis e Condomínios (3.2.03.01.06)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
-        { id: 'pend-5', fitid: '5306113700', data: '2026-11-21', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Pix Arrendamento Lucas Parreira Castro (Comp. 05/26)', valor: 960.00, sugUnidade: 'Lacqua V - 246', sugPlano: 'Alugueis e Condomínios (3.2.03.01.06)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
-        { id: 'pend-6', fitid: '5309638779', data: '2026-11-22', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Pix Arrendamento Lucas Parreira Castro (Comp. 06/26)', valor: 960.00, sugUnidade: 'Piazza - 912', sugPlano: 'Alugueis e Condomínios (3.2.03.01.06)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
-        { id: 'pend-7', fitid: '5312721549', data: '2026-11-23', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Pix Arrendamento Lucas Parreira Castro (Comp. 07/26)', valor: 960.00, sugUnidade: 'Lacqua V - 134', sugPlano: 'Alugueis e Condomínios (3.2.03.01.06)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
+        { id: 'pend-2', fitid: '5298408906', data: '2026-11-19', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'DARF Simples Nacional (Cód. 0385)', valor: 178.31, sugUnidade: 'TODAS', sugPlano: 'DARF folha (2.1.02.01.08)', sugGerencial: 'IMPOSTOS FEDERAIS', sugPgdas: 'Não se aplica', jaContabilizadoNoFechamento: true },
+        { id: 'pend-3', fitid: '5298743634', data: '2026-11-19', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Transferência PIX do Arrendamento para o CPF do Lucas (Comp. 03/26)', valor: 960.00, sugUnidade: 'Lacqua V - 125', sugPlano: 'Contratos a Pagar (2.1.05.01.09)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
+        { id: 'pend-4', fitid: '5302760621', data: '2026-11-20', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Transferência PIX do Arrendamento para o CPF do Lucas (Comp. 04/26)', valor: 960.00, sugUnidade: 'Lacqua V - 237', sugPlano: 'Contratos a Pagar (2.1.05.01.09)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
+        { id: 'pend-5', fitid: '5306113700', data: '2026-11-21', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Transferência PIX do Arrendamento para o CPF do Lucas (Comp. 05/26)', valor: 960.00, sugUnidade: 'Lacqua V - 246', sugPlano: 'Contratos a Pagar (2.1.05.01.09)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
+        { id: 'pend-6', fitid: '5309638779', data: '2026-11-22', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Transferência PIX do Arrendamento para o CPF do Lucas (Comp. 06/26)', valor: 960.00, sugUnidade: 'Piazza - 912', sugPlano: 'Contratos a Pagar (2.1.05.01.09)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
+        { id: 'pend-7', fitid: '5312721549', data: '2026-11-23', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'Transferência PIX do Arrendamento para o CPF do Lucas (Comp. 07/26)', valor: 960.00, sugUnidade: 'Lacqua V - 134', sugPlano: 'Contratos a Pagar (2.1.05.01.09)', sugGerencial: 'ALUGUEL', sugPgdas: 'Não se aplica' },
         { id: 'pend-8', fitid: '5306721923', data: '2026-11-21', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'JJA Presentes e Utilidades (Acessórios Lacqua)', valor: 988.18, sugUnidade: 'TODAS', sugPlano: 'Material de Uso e Consumo (3.2.03.01.07)', sugGerencial: 'OUTRAS DEPESAS', sugPgdas: 'Não se aplica' },
         { id: 'pend-9', fitid: '5312481983', data: '2026-11-23', mes_num: 11, conta: 'LUMINE PJ (BTG)', tipo: 'Débito (Saída)', descricao: 'DAS Simples Nacional (Ref. Out/26)', valor: 1585.14, sugUnidade: 'TODAS', sugPlano: 'Simples Nacional (DAS) (2.1.04.01.01)', sugGerencial: 'IMPOSTOS FEDERAIS', sugPgdas: 'Não se aplica', jaContabilizadoNoFechamento: true }
       ];
@@ -1357,7 +1398,7 @@
 
       function loadState() {
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
+          const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('lumine_caldas_os_v4_das_darf');
           if (!raw) return;
           const saved = JSON.parse(raw);
           if (Array.isArray(saved.units)) state.units = saved.units;
@@ -1368,6 +1409,18 @@
           if (Array.isArray(saved.planoEntradas)) state.planoEntradas = saved.planoEntradas;
           if (Array.isArray(saved.planoSaidas)) state.planoSaidas = saved.planoSaidas;
           if (Array.isArray(saved.gerencialRfb)) state.gerencialRfb = saved.gerencialRfb;
+
+          // Garantir que Contratos a Pagar (2.1.05.01.09) esteja presente mesmo em sessões já salvas
+          const despGrp = state.planoSaidas.find(g => g.grupo === 'DESPESAS OPERACIONAIS');
+          if (despGrp && !despGrp.contas.includes('Contratos a Pagar (2.1.05.01.09)')) {
+            despGrp.contas.unshift('Contratos a Pagar (2.1.05.01.09)');
+          }
+          // Atualizar sugestões pendentes de arrendamento para 2.1.05.01.09
+          state.pendingQueue.forEach(p => {
+            if ((p.descricao || '').toLowerCase().includes('arrendamento')) {
+              p.sugPlano = 'Contratos a Pagar (2.1.05.01.09)';
+            }
+          });
         } catch (e) { console.warn(e); }
       }
 
@@ -1582,7 +1635,7 @@
         document.getElementById('kpiDespesasOp').textContent = formatBRL(agg.despOp);
         document.getElementById('kpiFinanciamentos').textContent = formatBRL(agg.financiamento);
         document.getElementById('kpiImpostosAjuste').textContent = formatBRL(agg.imposto - agg.ajuste);
-        document.getElementById('kpiImpostosSub').textContent = `DAS: ${formatBRL(agg.imposto)} | Irmão: ${formatBRL(agg.ajuste)}`;
+        document.getElementById('kpiImpostosSub').textContent = `DAS+DARF: ${formatBRL(agg.imposto)} | Irmão: ${formatBRL(agg.ajuste)}`;
         document.getElementById('kpiLucroFinal').textContent = formatBRL(agg.lucroFinal);
         document.getElementById('kpiMargemBadge').textContent = formatPct(agg.receita > 0 ? (agg.lucroFinal / agg.receita) * 100 : 0);
 
@@ -1716,7 +1769,7 @@
           const d = hit.data;
           tooltip.innerHTML = `<div class="font-bold text-white border-b border-white/10 pb-1 mb-1">${d.mes_nome}/2026</div>
             <div class="flex justify-between gap-4"><span class="text-cyan-300">Receita:</span><span class="money font-semibold">${formatBRL(d.receita)}</span></div>
-            <div class="flex justify-between gap-4"><span class="text-pink-300">Saídas:</span><span class="money font-semibold">${formatBRL(d.saidasTotais)}</span></div>
+            <div class="flex justify-between gap-4"><span class="text-pink-300">Saídas (c/ DAS+DARF):</span><span class="money font-semibold">${formatBRL(d.saidasTotais)}</span></div>
             <div class="flex justify-between gap-4"><span class="text-violet-300">Lucro:</span><span class="money font-bold text-cyan-300">${formatBRL(d.lucroFinal)}</span></div>`;
           tooltip.classList.remove('hidden');
           tooltip.style.left = `${Math.min(rect.width - 210, Math.max(10, cx - rect.left + 12))}px`;
@@ -1831,14 +1884,43 @@
         return UNITS_DROPDOWN.map(u => `<option value="${u}" ${u === selectedValue ? 'selected' : ''}>${u}</option>`).join('');
       }
 
+      function checkContajaRuleBanner() {
+        const planoVal = document.getElementById('entryPlanoContas').value || '';
+        const banner = document.getElementById('contajaRuleBanner');
+        if (planoVal.includes('2.1.05.01.09') || planoVal.includes('Contratos a Pagar')) {
+          banner.classList.remove('hidden');
+        } else {
+          banner.classList.add('hidden');
+        }
+      }
+
+      window.applyArrendamentoPreset = function () {
+        document.getElementById('entryAccount').value = 'LUMINE PJ (BTG)';
+        document.getElementById('entryType').value = 'Débito (Saída)';
+        syncFormClassificationDropdowns();
+        document.getElementById('entryUnit').value = 'Lacqua V - 125';
+        document.getElementById('entryPlanoContas').value = 'Contratos a Pagar (2.1.05.01.09)';
+        document.getElementById('entryGerencial').value = 'ALUGUEL';
+        updateLiveRfbBadge();
+        document.getElementById('entryPgdas').value = 'Não se aplica';
+        document.getElementById('entryCompetenciaTipo').value = 'Despesa';
+        document.getElementById('entryDocumento').value = 'Contrato Arrendamento / PIX';
+        document.getElementById('entryDescription').value = 'Transferência PIX do Arrendamento para o CPF do Lucas';
+        document.getElementById('entryNotes').value = 'Contajá: Contratos a Pagar 2.1.05.01.09 (não usar Distribuição de Lucros)';
+        checkContajaRuleBanner();
+        document.getElementById('entryAmount').focus();
+        showToast('Regra Contajá Aplicada!', 'Preenchido como Contratos a Pagar (2.1.05.01.09). Informe o valor e selecione o apartamento.', 'violet');
+      };
+
       function syncFormClassificationDropdowns() {
         const isEntrada = document.getElementById('entryType').value.includes('Crédito');
         document.getElementById('planoContasModeLabel').textContent = isEntrada ? 'ENTRADAS' : 'SAÍDAS';
-        document.getElementById('entryPlanoContas').innerHTML = buildPlanoContasOptionsHtml(isEntrada, isEntrada ? 'Recebimento de Clientes (1.1.02.01.01)' : 'Alugueis e Condomínios (3.2.03.01.06)');
+        document.getElementById('entryPlanoContas').innerHTML = buildPlanoContasOptionsHtml(isEntrada, isEntrada ? 'Recebimento de Clientes (1.1.02.01.01)' : 'Contratos a Pagar (2.1.05.01.09)');
         const gerSel = document.getElementById('entryGerencial');
-        gerSel.innerHTML = buildGerencialOptionsHtml(gerSel.value || (isEntrada ? 'HOSPEDAGEM DESC. COMISSÃO' : 'DESPESA'));
+        gerSel.innerHTML = buildGerencialOptionsHtml(isEntrada ? 'HOSPEDAGEM DESC. COMISSÃO' : 'DESPESA');
         updateLiveRfbBadge();
         document.getElementById('entryPgdas').innerHTML = buildPgdasOptionsHtml(isEntrada ? PGDAS_OPTIONS[0] : 'Não se aplica');
+        checkContajaRuleBanner();
       }
 
       function updateLiveRfbBadge() {
@@ -1852,15 +1934,22 @@
         if (entry.jaContabilizadoNoFechamento) return;
         const mNum = Number(entry.mes_num), val = Number(entry.valor || 0);
         const isCredit = entry.tipo.includes('Crédito');
+        const p = (entry.plano_contas || '').toLowerCase(), g = (entry.gerencial || '').toLowerCase();
+
+        if (!isCredit && (p.includes('simples nacional (das)') || p.includes('darf folha') || p.includes('impostos e taxas federais'))) {
+          if (!state.closings[mNum]) state.closings[mNum] = { ajuste: 0, imposto: 0 };
+          state.closings[mNum].imposto = Number((Number(state.closings[mNum].imposto || 0) + val).toFixed(2));
+          return;
+        }
+
         const unit = entry.unidade === 'TODAS' ? 'Lacqua V - 125' : entry.unidade;
         let rec = state.monthlyRecords.find(r => r.mes_num === mNum && r.unidade === unit);
         if (!rec) { rec = { mes_num: mNum, unidade: unit }; state.monthlyRecords.push(rec); }
         if (isCredit) {
           rec.receita = Number(rec.receita || 0) + val;
         } else {
-          const p = (entry.plano_contas || '').toLowerCase(), g = (entry.gerencial || '').toLowerCase();
           if (g.includes('financiamento') || p.includes('financiamentos bancários')) rec.financiamento = Number(rec.financiamento || 0) + val;
-          else if (g.includes('condom') || p.includes('condom')) rec.condominio = Number(rec.condominio || 0) + val;
+          else if (g.includes('condom') || p.includes('alugueis e condomínios')) rec.condominio = Number(rec.condominio || 0) + val;
           else if (g.includes('energia') || p.includes('energia')) rec.energia = Number(rec.energia || 0) + val;
           else if (p.includes('iptu')) rec.iptu = Number(rec.iptu || 0) + val;
           else rec.despesas = Number(rec.despesas || 0) + val;
@@ -1971,7 +2060,7 @@
       }
 
       function parseOfxDate(raw) {
-        if (!raw || raw.length < 8) return '2026-11-25';
+        if (!raw || raw.length < 8) return '2026-11-27';
         return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
       }
 
@@ -1984,10 +2073,14 @@
           if (txt.includes('remunera') || txt.includes('rendimento')) return { unidade: 'TODAS', plano: 'Rendimentos de Aplicações Financeiras (3.1.03.01.01)', gerencial: 'RECEITA', pgdas: 'Não se aplica' };
           return { unidade: 'TODAS', plano: 'Recebimento de Clientes (1.1.02.01.01)', gerencial: 'RECEITA', pgdas: PGDAS_OPTIONS[0] };
         }
+        // Regra Contajá: Transferência PIX de Arrendamento PJ -> CPF Lucas = Contratos a Pagar (2.1.05.01.09)
+        if (txt.includes('arrendamento') || txt.includes('lucas parreira')) {
+          return { unidade: 'Lacqua V - 125', plano: 'Contratos a Pagar (2.1.05.01.09)', gerencial: 'ALUGUEL', pgdas: 'Não se aplica' };
+        }
         if (txt.includes('equatorial') || txt.includes('energia')) return { unidade: 'Lacqua V - 125', plano: 'Energia Elétrica (3.2.03.01.05)', gerencial: 'ENERGIA', pgdas: 'Não se aplica' };
         if (txt.includes('condom')) return { unidade: txt.includes('piazza') ? 'Piazza - 912' : 'Lacqua V - 125', plano: 'Alugueis e Condomínios (3.2.03.01.06)', gerencial: 'CONDOMÍNIO', pgdas: 'Não se aplica' };
-        if (txt.includes('das') || txt.includes('simples') || txt.includes('darf')) return { unidade: 'TODAS', plano: 'Simples Nacional (DAS) (2.1.04.01.01)', gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica' };
-        if (txt.includes('arrendamento') || txt.includes('lucas parreira')) return { unidade: 'Lacqua V - 125', plano: 'Alugueis e Condomínios (3.2.03.01.06)', gerencial: 'ALUGUEL', pgdas: 'Não se aplica' };
+        if (txt.includes('darf')) return { unidade: 'TODAS', plano: 'DARF folha (2.1.02.01.08)', gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica' };
+        if (txt.includes('das') || txt.includes('simples')) return { unidade: 'TODAS', plano: 'Simples Nacional (DAS) (2.1.04.01.01)', gerencial: 'IMPOSTOS FEDERAIS', pgdas: 'Não se aplica' };
         return { unidade: 'TODAS', plano: 'Despesas Gerais (3.2.03.01.21)', gerencial: 'OUTRAS DEPESAS', pgdas: 'Não se aplica' };
       }
 
@@ -2077,7 +2170,7 @@
       };
 
       window.downloadSampleBTGOfx = function () {
-        const ofx = `OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\n<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><BANKACCTFROM><BANKID>0208<ACCTID>00459182-1</BANKACCTFROM><BANKTRANLIST><DTSTART>20261120<DTEND>20261127\n<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261125<TRNAMT>3420.50<FITID>BTG20261125001<MEMO>Transf Pix recebida - ACOLHER TURISMO LTDA (Lacqua 125)</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261126<TRNAMT>-412.80<FITID>BTG20261126002<MEMO>Equatorial Goias Distr Ener Sa - UC Lacqua 125</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261123<TRNAMT>-1585.14<FITID>5312481983<MEMO>DAS SIMPLES NACIONAL (Teste Deduplicacao FITID)</STMTTRN>\n</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>`;
+        const ofx = `OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\n<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><BANKACCTFROM><BANKID>0208<ACCTID>00459182-1</BANKACCTFROM><BANKTRANLIST><DTSTART>20261120<DTEND>20261127\n<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261125<TRNAMT>3420.50<FITID>BTG20261125001<MEMO>Transf Pix recebida - ACOLHER TURISMO LTDA (Lacqua 125)</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261126<TRNAMT>-960.00<FITID>BTG20261126003<MEMO>Pix enviado para Lucas Parreira Castro - Arrendamento</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261126<TRNAMT>-412.80<FITID>BTG20261126002<MEMO>Equatorial Goias Distr Ener Sa - UC Lacqua 125</STMTTRN>\n</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>`;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([ofx], { type: 'application/x-ofx' }));
         a.download = 'extrato_btg_teste_nov2026.ofx';
@@ -2092,7 +2185,7 @@
           Mes_Num: r.mes_num, Mes: MONTH_NAMES[r.mes_num], Unidade: r.unidade, Regime: getUnitScope(r.unidade),
           Receita: Number(r.receita || 0), Condominio: Number(r.condominio || 0), Energia: Number(r.energia || 0),
           Lavanderia: Number(r.lavanderia || 0), IPTU: Number(r.iptu || 0), Comissao: Number(r.comissao || 0),
-          Outras_Despesas: Number(r.despesas || 0), Financiamento_PF: Number(r.financiamento || 0)
+          Outras_Despesas_Arrendamento: Number(r.despesas || 0), Financiamento_PF: Number(r.financiamento || 0)
         }))), 'Resumo_Aptos_2026');
 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.customLedger.length ? state.customLedger.map(l => ({
@@ -2122,7 +2215,7 @@
               if (rows.length) state.monthlyRecords = rows.map(r => ({
                 mes_num: Number(r.Mes_Num || 1), unidade: String(r.Unidade || ''), receita: Number(r.Receita || 0),
                 condominio: Number(r.Condominio || 0), energia: Number(r.Energia || 0), lavanderia: Number(r.Lavanderia || 0),
-                iptu: Number(r.IPTU || 0), comissao: Number(r.Comissao || 0), despesas: Number(r.Outras_Despesas || 0), financiamento: Number(r.Financiamento_PF || 0)
+                iptu: Number(r.IPTU || 0), comissao: Number(r.Comissao || 0), despesas: Number(r.Outras_Despesas_Arrendamento ?? r.Outras_Despesas ?? 0), financiamento: Number(r.Financiamento_PF || 0)
               }));
             }
             if (wb.Sheets['Fechamentos_Irmao_DAS']) {
@@ -2153,7 +2246,7 @@
           html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-cyan-300">Plano de Contas — Entradas (10 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoEntradas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-cyan-400/20"><div class="text-xs font-extrabold text-cyan-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || c.toLowerCase().includes(q)).map(c => `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
         }
         if (filter === 'all' || filter === 'saidas') {
-          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-pink-300">Plano de Contas — Saídas (9 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoSaidas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-pink-400/20"><div class="text-xs font-extrabold text-pink-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || c.toLowerCase().includes(q)).map(c => `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+          html += `<div class="liquid-glass p-5 space-y-3"><h3 class="text-base font-bold text-pink-300">Plano de Contas — Saídas (9 Grupos)</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4">${state.planoSaidas.map(g => `<div class="p-4 rounded-xl bg-slate-950/65 border border-pink-400/20"><div class="text-xs font-extrabold text-pink-300 uppercase mb-2">${g.grupo}</div><ul class="space-y-1 font-mono text-[11px] text-slate-200">${g.contas.filter(c => !q || c.toLowerCase().includes(q)).map(c => c.includes('2.1.05.01.09') ? `<li class="text-amber-300 font-bold bg-amber-500/10 border border-amber-400/30 px-2 py-1 rounded-lg">${c} <span class="block font-sans text-[10px] font-normal text-amber-200/90">PIX Arrendamento PJ → CPF Lucas (Contajá)</span></li>` : `<li>${c}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
         }
         if (filter === 'all' || filter === 'pgdas') {
           html += `<div class="liquid-glass p-5 space-y-2"><h3 class="text-base font-bold text-violet-300">Atividades PGDAS-D (Simples Nacional Anexo III)</h3>${PGDAS_OPTIONS.map((p, i) => `<div class="p-3 rounded-xl bg-slate-950/65 border border-white/10 text-xs text-slate-200"><strong>#${i + 1}:</strong> ${p}</div>`).join('')}</div>`;
@@ -2187,7 +2280,7 @@
           return `<tr><td class="py-3 px-3 font-bold text-white">${item.unidade}</td><td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(item.rev)}</td><td class="py-3 px-3 text-right money text-slate-300">${formatPct(share * 100)}</td><td class="py-3 px-3 text-right money font-bold text-violet-300">${formatBRL(totalDas * share)}</td></tr>`;
         }).join('') + `<tr class="bg-violet-950/30 font-bold border-t-2 border-violet-400/35"><td class="py-3 px-3 text-white">TOTAL LUMINE PJ</td><td class="py-3 px-3 text-right money text-cyan-300">${formatBRL(totalPjRev)}</td><td class="py-3 px-3 text-right money text-white">100,0%</td><td class="py-3 px-3 text-right money text-violet-300">${formatBRL(totalDas)}</td></tr>`;
 
-        document.getElementById('supabaseSqlCode').textContent = `-- LUMINE & CALDAS OS — POSTGRESQL 15+ / SUPABASE\nCREATE TABLE IF NOT EXISTS public.unidades (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nome VARCHAR(80) NOT NULL UNIQUE, regime VARCHAR(50) NOT NULL, escopo VARCHAR(10) NOT NULL, ativa BOOLEAN DEFAULT TRUE);\nCREATE TABLE IF NOT EXISTS public.plano_contas (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), natureza VARCHAR(20) NOT NULL, grupo VARCHAR(80) NOT NULL, nome_conta VARCHAR(160) NOT NULL UNIQUE);\nCREATE TABLE IF NOT EXISTS public.classificacoes_gerenciais (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nome_gerencial VARCHAR(120) NOT NULL UNIQUE, enquadramento_rfb VARCHAR(140) NOT NULL);\nCREATE TABLE IF NOT EXISTS public.lancamentos (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), fitid VARCHAR(80) UNIQUE, data_movimento DATE NOT NULL, mes_competencia SMALLINT NOT NULL, conta_origem VARCHAR(60) NOT NULL, tipo_operacao VARCHAR(30) NOT NULL, unidade_nome VARCHAR(80) NOT NULL, plano_contas VARCHAR(160) NOT NULL, classificacao_gerencial VARCHAR(120) NOT NULL, enquadramento_rfb VARCHAR(140) NOT NULL, atividade_pgdas TEXT NOT NULL, valor NUMERIC(14,2) NOT NULL, descricao TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());\nCREATE TABLE IF NOT EXISTS public.fechamentos_mensais (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), ano SMALLINT DEFAULT 2026, mes SMALLINT NOT NULL, imposto_das_daf NUMERIC(14,2) DEFAULT 0, ajuste_irmao_vitor NUMERIC(14,2) DEFAULT 0, UNIQUE(ano, mes));\nALTER TABLE public.unidades ENABLE ROW LEVEL SECURITY;\nALTER TABLE public.lancamentos ENABLE ROW LEVEL SECURITY;\nCREATE POLICY "Auth unidades" ON public.unidades FOR ALL TO authenticated USING (true) WITH CHECK (true);\nCREATE POLICY "Auth lancamentos" ON public.lancamentos FOR ALL TO authenticated USING (true) WITH CHECK (true);`;
+        document.getElementById('supabaseSqlCode').textContent = `-- LUMINE & CALDAS OS — POSTGRESQL 15+ / SUPABASE\nCREATE TABLE IF NOT EXISTS public.unidades (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nome VARCHAR(80) NOT NULL UNIQUE, regime VARCHAR(50) NOT NULL, escopo VARCHAR(10) NOT NULL, ativa BOOLEAN DEFAULT TRUE);\nCREATE TABLE IF NOT EXISTS public.plano_contas (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), natureza VARCHAR(20) NOT NULL, grupo VARCHAR(80) NOT NULL, nome_conta VARCHAR(160) NOT NULL UNIQUE);\nCREATE TABLE IF NOT EXISTS public.classificacoes_gerenciais (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nome_gerencial VARCHAR(120) NOT NULL UNIQUE, enquadramento_rfb VARCHAR(140) NOT NULL);\nCREATE TABLE IF NOT EXISTS public.lancamentos (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), fitid VARCHAR(80) UNIQUE, data_movimento DATE NOT NULL, mes_competencia SMALLINT NOT NULL, conta_origem VARCHAR(60) NOT NULL, tipo_operacao VARCHAR(30) NOT NULL, unidade_nome VARCHAR(80) NOT NULL, plano_contas VARCHAR(160) NOT NULL, classificacao_gerencial VARCHAR(120) NOT NULL, enquadramento_rfb VARCHAR(140) NOT NULL, atividade_pgdas TEXT NOT NULL, valor NUMERIC(14,2) NOT NULL, descricao TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());\nCREATE TABLE IF NOT EXISTS public.fechamentos_mensais (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), ano SMALLINT DEFAULT 2026, mes SMALLINT NOT NULL, imposto_das_daf NUMERIC(14,2) DEFAULT 0, ajuste_irmao_vitor NUMERIC(14,2) DEFAULT 0, UNIQUE(ano, mes));\nINSERT INTO public.plano_contas (natureza, grupo, nome_conta) VALUES ('SAIDA', 'DESPESAS OPERACIONAIS', 'Contratos a Pagar (2.1.05.01.09)') ON CONFLICT DO NOTHING;\nALTER TABLE public.unidades ENABLE ROW LEVEL SECURITY;\nALTER TABLE public.lancamentos ENABLE ROW LEVEL SECURITY;\nCREATE POLICY "Auth unidades" ON public.unidades FOR ALL TO authenticated USING (true) WITH CHECK (true);\nCREATE POLICY "Auth lancamentos" ON public.lancamentos FOR ALL TO authenticated USING (true) WITH CHECK (true);`;
       }
 
       window.switchTab = function (tabId) {
@@ -2270,6 +2363,7 @@
         document.getElementById('cancelResetBtn').addEventListener('click', closeResetModal);
         document.getElementById('confirmResetBtn').addEventListener('click', () => {
           localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem('lumine_caldas_os_v4_das_darf');
           location.reload();
         });
 
@@ -2296,6 +2390,7 @@
         });
 
         document.getElementById('entryType').addEventListener('change', syncFormClassificationDropdowns);
+        document.getElementById('entryPlanoContas').addEventListener('change', checkContajaRuleBanner);
         document.getElementById('entryGerencial').addEventListener('change', updateLiveRfbBadge);
 
         document.getElementById('manualEntryForm').addEventListener('submit', e => {
@@ -2330,7 +2425,6 @@
         document.getElementById('ledgerSearchInput').addEventListener('input', e => { state.ledgerSearch = e.target.value; renderCustomLedger(); });
         document.getElementById('ledgerAccountFilter').addEventListener('change', e => { state.ledgerAccountFilter = e.target.value; renderCustomLedger(); });
 
-        // Dropzone OFX / XLSX
         const dropzone = document.getElementById('bankDropzone');
         const fileInput = document.getElementById('spreadsheetFileInput');
         function processUploadedFile(file) {
@@ -2363,7 +2457,6 @@
         dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
         dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); processUploadedFile(e.dataTransfer.files[0]); });
 
-        // Catálogo Aba 4
         document.getElementById('catalogSearchInput').addEventListener('input', e => { state.catalogSearch = e.target.value; renderCatalogTab(); });
         document.querySelectorAll('.cat-filter-btn').forEach(btn => btn.addEventListener('click', () => {
           document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.remove('active', 'bg-cyan-400/20', 'text-cyan-300', 'border-cyan-400/40'));
@@ -2390,7 +2483,6 @@
           showToast('Item Adicionado!', `${name} incluído no Plano de Contas.`, 'cyan');
         });
 
-        // Fiscal & SQL
         document.getElementById('taxMonthSelect').addEventListener('change', renderTaxAndSqlTab);
         document.getElementById('copySqlBtn').addEventListener('click', () => {
           navigator.clipboard.writeText(document.getElementById('supabaseSqlCode').textContent);
