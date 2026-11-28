@@ -215,30 +215,25 @@
         <p class="text-xs text-slate-400">Acesso Restrito • Supabase Auth + PostgreSQL RLS</p>
       </div>
 
-      <!-- Configuração de Conexão Supabase (Project URL + Publishable Key) -->
-      <div id="supabaseConfigBox" class="p-3.5 rounded-xl bg-slate-950/80 border border-cyan-400/35 space-y-3">
+      <!-- Caixa de Configuração Inicial (Fica OCULTA automaticamente assim que conectada) -->
+      <div id="supabaseConfigBox" class="hidden p-3.5 rounded-xl bg-slate-950/85 border border-cyan-400/35 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-cyan-300">🔌 Conexão com Seu Banco Supabase</span>
-          <span id="supabaseConnBadge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-400/35">Pendente</span>
+          <span class="text-xs font-bold text-cyan-300">🔌 Configurar Conexão Supabase</span>
+          <button type="button" id="closeSupabaseConfigBtn" class="hidden text-xs text-slate-400 hover:text-white">✕</button>
         </div>
 
-        <div id="supabaseConfigFields" class="space-y-2.5">
+        <div class="space-y-2.5">
           <div>
-            <label for="sbUrlInput" class="block text-[11px] text-slate-400 mb-1">Project URL (sem /rest/v1/ no final)</label>
-            <input type="url" id="sbUrlInput" placeholder="https://txirpvctwqkfbwgjwkye.supabase.co" class="glass-input w-full px-3 py-2 text-xs font-mono" />
+            <label for="sbUrlInput" class="block text-[11px] text-slate-400 mb-1">Project URL</label>
+            <input type="url" id="sbUrlInput" placeholder="https://seu-projeto.supabase.co" class="glass-input w-full px-3 py-2 text-xs font-mono" />
           </div>
           <div>
-            <label for="sbAnonKeyInput" class="block text-[11px] text-slate-400 mb-1">Publishable Key (sb_publishable_... ou anon eyJ...)</label>
+            <label for="sbAnonKeyInput" class="block text-[11px] text-slate-400 mb-1">Publishable Key (sb_publishable_...)</label>
             <input type="password" id="sbAnonKeyInput" placeholder="sb_publishable_..." class="glass-input w-full px-3 py-2 text-xs font-mono" />
           </div>
           <button type="button" id="saveSupabaseConfigBtn" class="btn-neon-violet w-full py-2 px-3 rounded-xl text-xs font-bold">
-            💾 Conectar ao Supabase
+            💾 Salvar &amp; Ocultar Configuração
           </button>
-        </div>
-
-        <div id="supabaseConnectedSummary" class="hidden flex items-center justify-between text-[11px] text-slate-300">
-          <span id="sbConnectedHost" class="font-mono text-emerald-300 truncate max-w-[230px]">Conectado</span>
-          <button type="button" id="editSupabaseConfigBtn" class="text-cyan-300 hover:underline">Alterar chaves</button>
         </div>
       </div>
 
@@ -258,16 +253,17 @@
         </div>
 
         <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-400/40 text-xs text-rose-300 font-medium leading-relaxed">
-          Falha na autenticação. Verifique seu e-mail, senha e conexão Supabase.
+          Falha na autenticação. Verifique seu e-mail e senha.
         </div>
 
         <button type="submit" id="loginSubmitBtn" class="btn-neon-cyan w-full py-3 px-4 rounded-xl text-sm font-extrabold">
           🔓 Entrar no Sistema na Nuvem
         </button>
 
-        <p class="text-[11px] text-center text-slate-400 leading-relaxed">
-          Nenhum dado financeiro fica exposto no GitHub. Os registros são carregados somente após validação criptográfica no servidor Supabase.
-        </p>
+        <div class="pt-1 flex items-center justify-between text-[11px] text-slate-400">
+          <span>🔒 Banco Nuvem Criptografado • RLS Ativo</span>
+          <button type="button" id="editSupabaseConfigBtn" class="text-slate-500 hover:text-cyan-300 transition-colors" title="Configurar chaves do servidor">⚙️</button>
+        </div>
       </form>
     </div>
   </div>
@@ -1069,7 +1065,7 @@
       'use strict';
 
       // ========================================================================
-      // CONFIGURAÇÃO DO SUPABASE (Preencha aqui OU cole direto na tela de Login)
+      // CONFIGURAÇÃO DO SUPABASE (Preencha aqui OU salve uma vez no navegador)
       // ========================================================================
       const DEFAULT_SUPABASE_URL = '';
       const DEFAULT_SUPABASE_ANON_KEY = '';
@@ -1163,27 +1159,22 @@
 
       function initSupabaseClientFromConfig() {
         const cfg = getSavedSupabaseConfig();
-        const badge = document.getElementById('supabaseConnBadge');
-        const fieldsBox = document.getElementById('supabaseConfigFields');
-        const summaryBox = document.getElementById('supabaseConnectedSummary');
+        const configBox = document.getElementById('supabaseConfigBox');
+        const closeBtn = document.getElementById('closeSupabaseConfigBtn');
 
         if (cfg.url && cfg.anonKey && cfg.url.startsWith('http')) {
           localStorage.setItem(SUPABASE_CFG_STORAGE_KEY, JSON.stringify(cfg));
           supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
           document.getElementById('sbUrlInput').value = cfg.url;
           document.getElementById('sbAnonKeyInput').value = cfg.anonKey;
-          badge.textContent = 'Conectado';
-          badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-400/35';
-          fieldsBox.classList.add('hidden');
-          summaryBox.classList.remove('hidden');
-          document.getElementById('sbConnectedHost').textContent = cfg.url.replace('https://', '');
+          // Oculta automaticamente a caixa de conexão para não expor a URL na tela de login
+          configBox.classList.add('hidden');
+          closeBtn.classList.remove('hidden');
           return true;
         } else {
           supabaseClient = null;
-          badge.textContent = 'Pendente';
-          badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-400/35';
-          fieldsBox.classList.remove('hidden');
-          summaryBox.classList.add('hidden');
+          configBox.classList.remove('hidden');
+          closeBtn.classList.add('hidden');
           return false;
         }
       }
@@ -2634,12 +2625,15 @@
           }
           localStorage.setItem(SUPABASE_CFG_STORAGE_KEY, JSON.stringify({ url, anonKey }));
           initSupabaseClientFromConfig();
-          showToast('Conectado!', 'Agora entre com seu e-mail e senha cadastrados no Supabase.', 'emerald');
+          showToast('Conectado!', 'Configuração salva e ocultada da tela.', 'emerald');
         });
 
         document.getElementById('editSupabaseConfigBtn').addEventListener('click', () => {
-          document.getElementById('supabaseConfigFields').classList.remove('hidden');
-          document.getElementById('supabaseConnectedSummary').classList.add('hidden');
+          document.getElementById('supabaseConfigBox').classList.toggle('hidden');
+        });
+
+        document.getElementById('closeSupabaseConfigBtn').addEventListener('click', () => {
+          document.getElementById('supabaseConfigBox').classList.add('hidden');
         });
 
         document.getElementById('toggleLoginPwdBtn').addEventListener('click', () => {
@@ -2650,7 +2644,8 @@
         document.getElementById('loginForm').addEventListener('submit', async e => {
           e.preventDefault();
           if (!supabaseClient) {
-            showToast('Conecte ao Supabase', 'Cole primeiro a URL e a Publishable Key do projeto acima.', 'rose');
+            document.getElementById('supabaseConfigBox').classList.remove('hidden');
+            showToast('Conecte ao Supabase', 'Informe a Project URL e a Publishable Key acima.', 'rose');
             return;
           }
           const btn = document.getElementById('loginSubmitBtn');
@@ -2673,7 +2668,7 @@
               } else if (rawMsg.includes('Email not confirmed')) {
                 friendly = 'E-mail ainda não confirmado. No Supabase → Authentication → Users, clique no usuário e marque como confirmado.';
               } else if (rawMsg.includes('Failed to fetch')) {
-                friendly = 'Não foi possível alcançar o servidor Supabase. Confira a Project URL e a Publishable Key.';
+                friendly = 'Não foi possível alcançar o servidor Supabase. Clique na engrenagem ⚙️ abaixo e confira a URL e a Publishable Key.';
               }
               errBox.textContent = friendly;
               errBox.classList.remove('hidden');
